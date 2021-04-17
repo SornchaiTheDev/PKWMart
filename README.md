@@ -1,6 +1,6 @@
 # PKW Mart
 ## ระบบ POS เพื่อใช้ชำระเงินในโรงเรียนภูเก็ตวิทยาลัย
-### Languages :
+### Tools :
 - React JS
 - Firebase
 
