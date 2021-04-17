@@ -1,23 +1,27 @@
 import React from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTimes } from "@fortawesome/free-solid-svg-icons";
 
-function Item({ order, name, amount, price, del, id }) {
+function Item({ order, name, amount, price, del, id, customer }) {
   return (
     <div style={styles}>
       <h3>{order}</h3>
       <h3>{name}</h3>
       <h3>{amount} ชิ้น </h3>
       <h3>{price} บาท</h3>
-      <span
-        style={{
-          border: "none",
-          outline: "none",
-          background: "none",
-          cursor: "pointer",
-        }}
-        onClick={() => del(id)}
-      >
-        X
-      </span>
+      {!customer && (
+        <span
+          style={{
+            border: "none",
+            outline: "none",
+            background: "none",
+            cursor: "pointer",
+          }}
+          onClick={() => del(id)}
+        >
+          <FontAwesomeIcon icon={faTimes} />
+        </span>
+      )}
     </div>
   );
 }

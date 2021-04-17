@@ -9,14 +9,19 @@ function Login() {
   const cookie = new Cookie();
 
   useEffect(() => {
-    if (cookie.get("logined") === "true") {
-      history.replace("/checkout");
-    }
-    firebase
-      .auth()
-      .signInAnonymously()
-      .then(() => cookie.set("logined", "true"))
-      .catch((err) => console.log(err));
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        history.replace("merchant/checkout");
+      }
+    });
+
+    // firebase.auth().signOut()
+    // console.log(firebase.auth().currentUser !== null);
+    // firebase
+    //   .auth()
+    //   .signInAnonymously()
+    //   .then(() => cookie.set("logined", "true"))
+    //   .catch((err) => console.log(err));
     // firebase.firestore().collection("test").doc("iJd4VqFRxVMc2MiAXjiT").get().then(doc => alert(doc.data().status)).catch((err) => alert(err.code))
     // firebase.auth().signOut().then(()=> alert("Signed Out !"))
   }, []);
