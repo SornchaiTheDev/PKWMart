@@ -2,7 +2,7 @@ import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 
-function Item({ order, name, amount, price, del, id, customer }) {
+function Item({ order, name, amount, price, del, id, customer , barcode }) {
   return (
     <div style={styles}>
       <h3>{order}</h3>
@@ -17,7 +17,7 @@ function Item({ order, name, amount, price, del, id, customer }) {
             background: "none",
             cursor: "pointer",
           }}
-          onClick={() => del(id)}
+          onClick={() => del({id , barcode , amount})}
         >
           <FontAwesomeIcon icon={faTimes} />
         </span>

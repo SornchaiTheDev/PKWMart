@@ -33,7 +33,6 @@ function Stock() {
   //All Items
   const [item, setItem] = useState([]);
 
-
   //Auth Status
   useEffect(() => {
     firebase.auth().onAuthStateChanged((user) => {
@@ -103,7 +102,7 @@ function Stock() {
             ) {
               return;
             }
-            data.push(doc.data());
+            data.push({ ...doc.data(), id: doc.id });
             last = doc.data().createdAt;
           });
           setItem((prev) => [...prev, ...data]);
@@ -115,7 +114,7 @@ function Stock() {
   };
   useEffect(() => {
     window.addEventListener("scroll", infiniteLoad);
-
+    console.log(item)
     return () => window.removeEventListener("scroll", infiniteLoad);
   }, [last]);
 
@@ -183,7 +182,8 @@ function Stock() {
                   สินค้าทั้งหมด
                 </h2>
                 <h1 style={{ fontSize: 64, color: front ? "black" : "white" }}>
-                  {count.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")} ชิ้น
+                  {count.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}{" "}
+                  ชิ้น
                 </h1>
               </div>
             </div>
@@ -195,7 +195,7 @@ function Stock() {
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                gap: 20,
+                gap: 100,
               }}
             >
               <div

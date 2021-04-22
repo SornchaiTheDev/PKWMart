@@ -3,6 +3,8 @@ import "../App.css";
 import Item from "../components/Item";
 import firebase from "../firebase";
 import QRCode from "react-qr-code";
+import Cookies from "universal-cookie";
+import { useParams } from "react-router-dom";
 
 const QRPay = () => {
   return (
@@ -23,13 +25,24 @@ const QRPay = () => {
 
 function CustomerView() {
   const [item, setItem] = useState([]);
+  const cookies = new Cookies();
 
+  const total = item.reduce((total, { price }) => total + price, 0);
+  const [change, setChange] = useState(0);
+  const { counter } = useParams();
   useEffect(() => {
-    firebase
-      .firestore()
-      .collection("counter")
-      .doc("test1")
-      .onSnapshot((doc) => setItem([...doc.data().now]));
+    const Fetch = async () => {
+      const url = new URL(window.location.href);
+      const counter = url.searchParams.get("counter");
+      firebase
+        .firestore()
+        .collection("counter")
+        .doc(counter)
+        .onSnapshot(
+          (doc) => (setItem([...doc.data().now]), setChange(doc.data().change))
+        );
+    };
+    Fetch();
   }, []);
 
   return (
@@ -47,10 +60,11 @@ function CustomerView() {
       >
         <div
           style={{
+            overflow: "hidden",
             marginLeft: 20,
             minWidth: "60%",
             background: "black",
-            minHeight: "90vh",
+            height: "90vh",
             backgroundColor: "white",
             boxShadow: "0px 0px 5px 2px rgba(0, 0, 0, 0.2)",
             paddingLeft: "50px",
@@ -59,12 +73,14 @@ function CustomerView() {
           }}
         >
           <h3 style={{ marginTop: 50, fontSize: 48 }}>
-            รายการสินค้า {item.length} ชิ้น
+            รายการสินค้า{" "}
+            {item.length}
+            ชิ้น
           </h3>
           <div
             style={{
               overflowY: "scroll",
-              minHeight: 650,
+              maxHeight: 650,
               width: "90%",
               padding: 10,
             }}
@@ -124,10 +140,20 @@ function CustomerView() {
               gap: 20,
             }}
           >
-            <QRCode value="https://google.co.th" size={300} />
-            <h3>
+            <iframe
+              src="https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2FPKWSchoolOfficial%2Fposts%2F902029460368426&amp;width=300&amp;show_text=true&amp;height=574&amp;appId"
+              width="350"
+              height="574"
+              style={{ border: "none", overflow: "hidden" }}
+              scrolling="no"
+              frameborder="0"
+              allowfullscreen="true"
+              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+            ></iframe>
+            {/* <QRCode value="https://google.co.th" size={300} /> */}
+            {/* <h3>
               แสกนจ่ายในแอพ <span style={{ color: "#0099FF" }}>ได้เพย์</span>
-            </h3>
+            </h3> */}
           </div>
           <div
             style={{
@@ -147,6 +173,10 @@ function CustomerView() {
                 {item.reduce((total, { price }) => total + price, 0)}
               </span>{" "}
               บาท
+            </h3>
+            <h3 style={{ fontSize: "3rem" }}>
+              เงินทอน
+              <span style={{ color: "#0099FF" }}>{change}</span> บาท
             </h3>
           </div>
           {/* <div

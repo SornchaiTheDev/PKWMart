@@ -23,6 +23,7 @@ const Items = ({
   addItem,
   doc,
   success,
+  barcodes,
 }) => {
   const [barcode, setBarcode] = useState("");
   const [name, setName] = useState("");
@@ -33,6 +34,7 @@ const Items = ({
 
   useEffect(() => {
     setBarcode(item_barcode);
+
     setName(item_name);
     setPrice(item_price);
     const item_amount = front ? front_amount : stock_amount;
@@ -71,6 +73,7 @@ const Items = ({
         .collection("stock")
         .doc(barcode)
         .set({
+          barcode : barcode,
           name: name,
           price: parseInt(price),
           front_amount: 0,
@@ -218,7 +221,9 @@ const Items = ({
                 className="items-input"
                 style={{ width: "2vw", color: amount > 5 ? "black" : "red" }}
               >
-                {amount > 0 ? amount.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") : "หมด"}
+                {amount > 0
+                  ? amount.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
+                  : "หมด"}
               </h3>
             )}
           </>

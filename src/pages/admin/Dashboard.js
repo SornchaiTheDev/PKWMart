@@ -48,7 +48,7 @@ function Dashboard() {
       .onSnapshot((docs) => {
         let data = [];
         docs.forEach((doc) => data.push(doc.data()));
-        
+
         setHits(data);
       });
   }, []);

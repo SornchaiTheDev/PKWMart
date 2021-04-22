@@ -30,36 +30,36 @@ function ChangeAlert({ counterId, open }) {
     }, 1000);
   }, [time]);
 
-  useEffect(() => {
-    if (time !== null && time.getHours() === 16) {
-      setShow(true);
-      firebase
-        .firestore()
-        .collection("admin")
-        .doc("salary")
-        .get()
-        .then((doc) => {
-          const date = new Date().getDay() - 1;
-          const day = ["จันทร์", "อังคาร", "พุธ", "พฤหัส", "ศุกร์"];
+  // useEffect(() => {
+  //   if (time !== null && time.getHours() === 16) {
+  //     setShow(true);
+  //     firebase
+  //       .firestore()
+  //       .collection("admin")
+  //       .doc("salary")
+  //       .get()
+  //       .then((doc) => {
+  //         const date = new Date().getDay() - 1;
+  //         const day = ["จันทร์", "อังคาร", "พุธ", "พฤหัส", "ศุกร์"];
 
-          const chart = [...doc.data().chart];
-          chart.filter((value, index) => index !== date);
-          firebase
-            .firestore()
-            .collection("admin")
-            .doc("salary")
-            .set(
-              {
-                chart: [
-                  ...chart.filter((value, index) => index !== date),
-                  { day: day[date], amount: doc.data().amount.day },
-                ],
-              },
-              { merge: true }
-            );
-        });
-    }
-  }, [time]);
+  //         const chart = [...doc.data().chart];
+  //         chart.filter((value, index) => index !== date);
+  //         firebase
+  //           .firestore()
+  //           .collection("admin")
+  //           .doc("salary")
+  //           .set(
+  //             {
+  //               chart: [
+  //                 ...chart.filter((value, index) => index !== date),
+  //                 { day: day[date], amount: doc.data().amount.day },
+  //               ],
+  //             },
+  //             { merge: true }
+  //           );
+  //       });
+  //   }
+  // }, [time]);
   return (
     <div
       style={{
