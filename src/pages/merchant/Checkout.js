@@ -11,7 +11,7 @@ import ChangeAlert from "../../components/ChangeAlert";
 import Numpad from "../../components/Numpad";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBarcode } from "@fortawesome/free-solid-svg-icons";
+import { faBarcode, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 
 import { v4 as uuid } from "uuid";
 import Print from "./Print";
@@ -161,9 +161,15 @@ const Conclusion = ({ counter, show, setGlobalItem, history }) => {
             width: "500px",
             minHeight: "300px",
             gap: 20,
-            padding: 10,
+            padding: 20,
           }}
         >
+          <FontAwesomeIcon
+            icon={faArrowLeft}
+            size="2x"
+            onClick={() => setOrder(1)}
+            style={{ alignSelf: "flex-start", cursor: "pointer" }}
+          />
           <div
             style={{
               display: "flex",
@@ -379,8 +385,12 @@ const BillCancel = ({ show, close, bill }) => {
       .get()
       .then((doc) => {
         // console.log(doc.data());
-        bill({ item: [...doc.data().items], bill: barcode });
-        close();
+        if (doc.data().status === "normal") {
+          bill({ item: [...doc.data().items], bill: barcode });
+          close();
+        } else {
+          alert("ไม่พบบิลนี้");
+        }
       })
       .catch((err) => alert("ไม่พบบิลนี้"));
   };
@@ -466,7 +476,15 @@ const BillCancel = ({ show, close, bill }) => {
 
 function Checkout() {
   const [item, setItem] = useState([
-    {name : "5" , price : 100 , amount : 2}
+    // {name : "test" , price : 25 , amount : 1},
+    // {name : "test" , price : 25 , amount : 1},
+    // {name : "test" , price : 25 , amount : 1},
+    // {name : "test" , price : 25 , amount : 1},
+    // {name : "test" , price : 25 , amount : 1},
+    // {name : "test" , price : 25 , amount : 1},
+    // {name : "test" , price : 25 , amount : 1},
+    // {name : "test" , price : 25 , amount : 1},
+    // {name : "test" , price : 25 , amount : 1},
   ]);
   const [show, setShow] = useState(false);
   const [money, setMoney] = useState([]);
@@ -534,9 +552,47 @@ function Checkout() {
     scroll.scrollTop = scroll.scrollHeight;
   }, [item]);
 
-  useEffect(() => {
-    console.log(VoidItem);
-  }, [VoidItem]);
+  // useEffect(() => {
+  //   console.log(bill);
+  // }, [bill]);
+
+  const BillDelete = async () => {
+    if (bill === "") {
+      setItem([]);
+      setMoney([]);
+      setClear(Math.random());
+    } else {
+      await firebase
+        .firestore()
+        .collection("history")
+        .doc(bill)
+        .update({ status: "cancel" }, { merge: true })
+        .then(() => console.log("success"));
+
+      await firebase
+        .firestore()
+        .collection("history")
+        .doc(bill)
+        .get()
+        .then(async (doc) => {
+          const price = doc.data().price;
+
+          await firebase
+            .firestore()
+            .collection("counter")
+            .doc(counter)
+            .update(
+              { salary: firebase.firestore.FieldValue.increment(-price) },
+              { merge: true }
+            )
+            .then(() => console.log("remove"));
+
+          setItem([]);
+          setMoney([]);
+          setBill("");
+        });
+    }
+  };
 
   const Payment = async () => {
     const billNumber = `${new Date().getDate()}${new Date().getMonth()}${new Date().getHours()}${new Date().getMinutes()}${new Date().getSeconds()}`;
@@ -544,13 +600,19 @@ function Checkout() {
     // const payIn = parseInt(money.join(""));
     const payIn = money;
 
-    if (VoidItem.length === 0) {
+    if (bill === "") {
       if (payIn >= total) {
         await firebase
           .firestore()
           .collection("history")
           .doc(billNumber)
-          .set({ payIn: payIn, items: item, time: new Date() })
+          .set({
+            payIn: payIn,
+            items: item,
+            time: new Date(),
+            status: "normal",
+            price: total,
+          })
           .then(() => {})
           .catch((err) => alert(`Add Failed! ${err.code}`));
 
@@ -609,7 +671,13 @@ function Checkout() {
         .firestore()
         .collection("history")
         .doc(bill)
-        .set({ payIn: payIn, items: item, time: new Date() })
+        .set({
+          payIn: payIn,
+          items: item,
+          time: new Date(),
+          status: "normal",
+          price: total,
+        })
         .then(() => {})
         .catch((err) => alert(`Add Failed! ${err.code}`));
 
@@ -628,7 +696,7 @@ function Checkout() {
         .firestore()
         .collection("counter")
         .doc(counter)
-        .set(
+        .update(
           { salary: firebase.firestore.FieldValue.increment(-price) },
           { merge: true }
         )
@@ -638,7 +706,7 @@ function Checkout() {
         .firestore()
         .collection("counter")
         .doc(counter)
-        .set(
+        .update(
           { salary: firebase.firestore.FieldValue.increment(total) },
           { merge: true }
         )
@@ -729,7 +797,7 @@ function Checkout() {
         .firestore()
         .collection("counter")
         .doc(counter)
-        .set({ now: item }, { merge: true });
+        .update({ now: item }, { merge: true });
   }, [item, counter]);
 
   useEffect(() => {
@@ -740,7 +808,7 @@ function Checkout() {
         .firestore()
         .collection("counter")
         .doc(counter)
-        .set({ change: 0 }, { merge: true });
+        .update({ change: 0 }, { merge: true });
 
     !changeOpen &&
       counter !== null &&
@@ -748,7 +816,7 @@ function Checkout() {
         .firestore()
         .collection("counter")
         .doc(counter)
-        .set({ change: 0 }, { merge: true });
+        .update({ change: 0 }, { merge: true });
   }, [counter, item, changeOpen]);
 
   const Scann = async (data) => {
@@ -1005,9 +1073,7 @@ function Checkout() {
               <div
                 className="payment"
                 style={{ backgroundColor: "red" }}
-                onClick={() => (
-                  setItem([]), setMoney([]), setClear(Math.random())
-                )}
+                onClick={() => BillDelete()}
               >
                 <h2>ยกเลิก</h2>
               </div>
