@@ -8,21 +8,24 @@ function Test() {
       .firestore()
       .collection("history")
       .orderBy("time", "desc")
-      .limit(91)
+      .limit(84)
       .get()
       .then((docs) => {
-        let payin = 0;
-        docs.forEach(
-          (doc) =>
-            // items.push(...doc.data().items),
-            (payin += parseInt(doc.data().payIn))
-          // console.log(new Date(doc.data().time.seconds * 1000).getDate()),
-        );
+        const items = [];
+        docs.forEach((doc) => {
+          items.push(doc.data());
 
-        console.log(payin);
+          console.log(new Date(doc.data().time.seconds * 1000).getDate());
+        });
+        
         let total = 0;
-
-        // items.forEach(({ price }) => setMoney((prev) => [...prev, price]));
+        
+        items
+        .filter(({ status }) => status !== "cancel")
+        .forEach(({ price }) => (total += price));
+        
+        console.log(items.filter(({ status }) => status !== "cancel").length)
+        console.log(total);
         // setMoney((prev) => [...prev, total])
       });
     // const fn = () => {

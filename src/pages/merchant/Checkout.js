@@ -127,6 +127,7 @@ const Conclusion = ({ counter, show, setGlobalItem, history }) => {
         total: total + 5000,
         change: 5000,
         profit: profit,
+        counter: counter,
       },
     ]);
     await firebase
@@ -386,7 +387,11 @@ const BillCancel = ({ show, close, bill }) => {
       .then((doc) => {
         // console.log(doc.data());
         if (doc.data().status === "normal") {
-          bill({ item: [...doc.data().items], bill: barcode });
+          bill({
+            item: [...doc.data().items],
+            bill: barcode,
+            counter: doc.data().counter,
+          });
           close();
         } else {
           alert("ไม่พบบิลนี้");
@@ -474,6 +479,74 @@ const BillCancel = ({ show, close, bill }) => {
   );
 };
 
+const Custom = ({ open, close, setItem }) => {
+  const [value, setValue] = useState("");
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        position: "fixed",
+        width: "100vw",
+        height: "100vh",
+        background: "rgba(0,0,0,0.25)",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          background: "white",
+          width: "20%",
+          minHeight: 100,
+          padding: 20,
+          borderRadius: 10,
+          gap: 20,
+        }}
+      >
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            setItem(value);
+          }}
+        >
+          <input
+            placeholder="ใส่จำนวนเงิน"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            autoFocus
+            style={{
+              padding: 10,
+              background: "white",
+              outline: "none",
+              border: "1px solid #0099FF",
+              borderRadius: 20,
+            }}
+          />
+        </form>
+
+        <button
+          style={{
+            cursor: "pointer",
+            outline: "none",
+            background: "red",
+            border: "none",
+            borderRadius: 20,
+            padding: "10px 40px",
+            color: "white",
+          }}
+          onClick={() => close()}
+        >
+          ยกเลิก
+        </button>
+      </div>
+    </div>
+  );
+};
+
 function Checkout() {
   const [item, setItem] = useState([
     // {name : "test" , price : 25 , amount : 1},
@@ -495,10 +568,13 @@ function Checkout() {
   const [changeOpen, setChangeOpen] = useState(false);
   const [closeShop, setCloseShop] = useState(false);
   const [multiply, setMultiply] = useState(1);
+  const [voidCounter, setVoidCounter] = useState("");
   const [billVoid, setBillVoid] = useState(false);
   const [VoidItem, setVoidItem] = useState([]);
   const [counter, setCounter] = useState(null);
+  const [custom, setCustom] = useState(false);
   const [bill, setBill] = useState("");
+  const [checkout, setCheckout] = useState(false);
   const history = useHistory();
   const cookies = new Cookies();
 
@@ -506,11 +582,12 @@ function Checkout() {
   const { GlobalItem, setGlobalItem } = useContext(Context);
 
   useEffect(() => {
-    const getCookie = async () => {
-      const counter = await cookies.get("counter");
+    const Fetch = async () => {
+      const url = new URL(window.location.href);
+      const counter = url.searchParams.get("counter");
       setCounter(counter);
     };
-    getCookie();
+    Fetch();
   }, []);
 
   useEffect(() => {
@@ -538,10 +615,10 @@ function Checkout() {
     setShow(show);
   }, []);
 
-  useEffect(() => {
-    firebase.auth().currentUser !== null &&
-      cookies.set("counter", firebase.auth().currentUser.email);
-  });
+  // useEffect(() => {
+  //   firebase.auth().currentUser !== null &&
+  //     cookies.set("counter", firebase.auth().currentUser.email);
+  // },);
 
   useEffect(() => {
     setChange(getChange);
@@ -580,7 +657,7 @@ function Checkout() {
           await firebase
             .firestore()
             .collection("counter")
-            .doc(counter)
+            .doc(voidCounter)
             .update(
               { salary: firebase.firestore.FieldValue.increment(-price) },
               { merge: true }
@@ -595,13 +672,18 @@ function Checkout() {
   };
 
   const Payment = async () => {
+    if (counter == null) return alert("err !");
+    if (checkout) return;
+
     const billNumber = `${new Date().getDate()}${new Date().getMonth()}${new Date().getHours()}${new Date().getMinutes()}${new Date().getSeconds()}`;
 
     // const payIn = parseInt(money.join(""));
     const payIn = money;
 
     if (bill === "") {
+      // alert(item.length)
       if (payIn >= total) {
+        setCheckout(true);
         await firebase
           .firestore()
           .collection("history")
@@ -612,6 +694,7 @@ function Checkout() {
             time: new Date(),
             status: "normal",
             price: total,
+            counter: counter,
           })
           .then(() => {})
           .catch((err) => alert(`Add Failed! ${err.code}`));
@@ -658,6 +741,7 @@ function Checkout() {
             change: payIn - total,
             billNumber: billNumber,
             price: total,
+            counter: counter,
           },
         ]);
         await cookies.set("change", payIn - total);
@@ -677,6 +761,7 @@ function Checkout() {
           time: new Date(),
           status: "normal",
           price: total,
+          counter: voidCounter,
         })
         .then(() => {})
         .catch((err) => alert(`Add Failed! ${err.code}`));
@@ -695,7 +780,7 @@ function Checkout() {
       await firebase
         .firestore()
         .collection("counter")
-        .doc(counter)
+        .doc(voidCounter)
         .update(
           { salary: firebase.firestore.FieldValue.increment(-price) },
           { merge: true }
@@ -705,7 +790,7 @@ function Checkout() {
       await firebase
         .firestore()
         .collection("counter")
-        .doc(counter)
+        .doc(voidCounter)
         .update(
           { salary: firebase.firestore.FieldValue.increment(total) },
           { merge: true }
@@ -791,6 +876,7 @@ function Checkout() {
   }, [item]);
 
   useEffect(() => {
+    console.log(item);
     counter !== null &&
       !changeOpen &&
       firebase
@@ -867,8 +953,23 @@ function Checkout() {
       <BillCancel
         show={billVoid}
         close={() => setBillVoid(false)}
-        bill={(data) => (setItem(data.item), setBill(data.bill))}
+        bill={(data) => (
+          setItem(data.item), setBill(data.bill), setVoidCounter(data.counter)
+        )}
       />
+      {custom && (
+        <Custom
+          close={() => setCustom(false)}
+          setItem={(data) => {
+            setItem((prev) => [
+              ...prev,
+              { name: "ไม่มีบาร์โค้ด", price: parseInt(data), amount: 1 },
+            ]);
+            setCustom(false);
+          }}
+        />
+      )}
+
       <Conclusion
         counter={counter}
         show={closeShop}
@@ -979,6 +1080,21 @@ function Checkout() {
                 onClick={() => setBillVoid(true)}
               >
                 ยกเลิกบิล
+              </button>
+              <button
+                style={{
+                  marginTop: 20,
+                  border: "none",
+                  background: "#0099FF",
+                  color: "white",
+                  padding: "20px 40px",
+                  borderRadius: 20,
+                  cursor: "pointer",
+                  outline: "none",
+                }}
+                onClick={() => setCustom(true)}
+              >
+                ขายเอง
               </button>
             </div>
           </div>

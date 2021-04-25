@@ -10,7 +10,7 @@ function End() {
 
   useEffect(() => {
     window.print();
-    history.replace("/merchant/checkout");
+    history.replace(`/merchant/checkout?counter=${GlobalItem[0].counter}`);
   }, []);
 
   return (
@@ -20,9 +20,11 @@ function End() {
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
+        
       }}
     >
       <h3>สรุปยอดการขายวันนี้</h3>
+      <h3>เคาท์เตอร์ที่ {GlobalItem[0].counter === "counter01@gmail.com" ? 1 : GlobalItem[0].counter === "counter02@gmail.com" ? 2 : "admin"}</h3>
       <div
         style={{
           display: "flex",

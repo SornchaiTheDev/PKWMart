@@ -13,7 +13,7 @@ function Print() {
   useEffect(() => {
     window.print();
     // setTimeout(() => {
-    history.replace("/merchant/checkout");
+    history.replace(`/merchant/checkout?counter=${GlobalItem[0].counter}`);
     // }, 1000);
   }, []);
 
