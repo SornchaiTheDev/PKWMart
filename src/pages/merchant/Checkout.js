@@ -549,15 +549,8 @@ const Custom = ({ open, close, setItem }) => {
 
 function Checkout() {
   const [item, setItem] = useState([
-    // {name : "test" , price : 25 , amount : 1},
-    // {name : "test" , price : 25 , amount : 1},
-    // {name : "test" , price : 25 , amount : 1},
-    // {name : "test" , price : 25 , amount : 1},
-    // {name : "test" , price : 25 , amount : 1},
-    // {name : "test" , price : 25 , amount : 1},
-    // {name : "test" , price : 25 , amount : 1},
-    // {name : "test" , price : 25 , amount : 1},
-    // {name : "test" , price : 25 , amount : 1},
+    { name: "เทส", amount: 1, price: 20 },
+    { name: "เทส2", amount: 1, price: 40 },
   ]);
   const [show, setShow] = useState(false);
   const [money, setMoney] = useState([]);
@@ -574,7 +567,10 @@ function Checkout() {
   const [counter, setCounter] = useState(null);
   const [custom, setCustom] = useState(false);
   const [bill, setBill] = useState("");
+  const [countdown, setCountdown] = useState(60);
   const [checkout, setCheckout] = useState(false);
+  const [qrPay, setQrPay] = useState(false);
+  const [qrBill, setQRBill] = useState("");
   const history = useHistory();
   const cookies = new Cookies();
 
@@ -590,9 +586,83 @@ function Checkout() {
     Fetch();
   }, []);
 
+  //QR Payment
+
   useEffect(() => {
-    console.log(counter);
-  }, [counter]);
+    const getStatus = async () => {
+      const response = await fetch(
+        `https://asia-south1-daipay.cloudfunctions.net/QRCheck?qr=${qrBill}`
+      );
+
+      const data = await response.json();
+
+      if (data.status === "success") {
+        QRPayFunc();
+        await firebase
+          .firestore()
+          .collection("counter")
+          .doc(counter)
+          .set({ qrBill: "" }, { merge: true });
+      }
+    };
+    const timeout = setTimeout(() => {
+      qrPay && item.length > 0 && qrBill !== "" && getStatus();
+      setCountdown((prev) => prev - 1);
+    }, 2000);
+    return () => clearTimeout(timeout);
+  }, [countdown, qrBill]);
+
+  useEffect(() => {
+    const QRbillNumber = `${new Date().getDate()}${new Date().getMonth()}${new Date().getHours()}${new Date().getMinutes()}${new Date().getSeconds()}`;
+    setQRBill(QRbillNumber);
+  }, []);
+
+  useEffect(() => {
+    const QRGen = async () => {
+      if (qrPay) {
+        const qrCreate = await fetch(
+          `https://asia-south1-daipay.cloudfunctions.net/QRGen?qr=${qrBill}`
+        );
+        const data = await qrCreate.json();
+        if (data.status === "success") {
+          await firebase
+            .firestore()
+            .collection("counter")
+            .doc(counter)
+            .set({ qrBill: qrBill }, { merge: true });
+        }
+      }
+    };
+    qrPay && QRGen();
+  }, [qrPay]);
+
+  const QRPayFunc = async () => {
+    setCheckout(true);
+    await firebase
+      .firestore()
+      .collection("e-history")
+      .doc(qrBill)
+      .set({
+        items: item,
+        time: new Date(),
+        status: "normal",
+        price: total,
+        counter: counter,
+      })
+      .then(() => {})
+      .catch((err) => alert(`Add Failed! ${err.code}`));
+
+    setGlobalItem({
+      type: "qr",
+      item: item,
+      billNumber: qrBill,
+      price: total,
+      counter: counter,
+    });
+
+    history.replace("/merchant/print");
+  };
+  //QR Payment --- End
 
   useEffect(() => {
     window.addEventListener("keyup", (e) => {
@@ -607,6 +677,10 @@ function Checkout() {
       if (e.code === "NumpadEnter") {
         setChange(0);
         cookies.set("change", 0);
+      }
+
+      if (e.code === "NumpadMinus") {
+        setCustom(true);
       }
     });
 
@@ -677,11 +751,10 @@ function Checkout() {
 
     const billNumber = `${new Date().getDate()}${new Date().getMonth()}${new Date().getHours()}${new Date().getMinutes()}${new Date().getSeconds()}`;
 
-    // const payIn = parseInt(money.join(""));
-    const payIn = money;
+    const payIn = parseInt(money.join(""));
+    // const payIn = money;
 
     if (bill === "") {
-      // alert(item.length)
       if (payIn >= total) {
         setCheckout(true);
         await firebase
@@ -734,16 +807,14 @@ function Checkout() {
               salary: firebase.firestore.FieldValue.increment(total),
             }));
 
-        setGlobalItem([
-          {
-            item: item,
-            total: payIn,
-            change: payIn - total,
-            billNumber: billNumber,
-            price: total,
-            counter: counter,
-          },
-        ]);
+        setGlobalItem({
+          item: item,
+          total: payIn,
+          change: payIn - total,
+          billNumber: billNumber,
+          price: total,
+          counter: counter,
+        });
         await cookies.set("change", payIn - total);
 
         history.replace("/merchant/print");
@@ -797,16 +868,14 @@ function Checkout() {
         )
         .then(() => console.log("add"));
 
-      setGlobalItem([
-        {
-          item: item,
-          billNumber: bill,
-          billVoid: true,
-          total: payIn,
-          price: total,
-          change: payIn - total,
-        },
-      ]);
+      setGlobalItem({
+        item: item,
+        billNumber: bill,
+        billVoid: true,
+        total: payIn,
+        price: total,
+        change: payIn - total,
+      });
 
       history.replace("/merchant/print");
     }
@@ -854,29 +923,28 @@ function Checkout() {
     setTotal(total);
   }, [item]);
 
-  useEffect(() => {
-    if (item.length === 0 && total !== 0) {
-      firebase
-        .firestore()
-        .collection("admin")
-        .doc("salary")
-        .set(
-          {
-            amount: {
-              day: firebase.firestore.FieldValue.increment(total),
-              month: firebase.firestore.FieldValue.increment(total),
-            },
-            last_update: firebase.firestore.FieldValue.serverTimestamp(),
-          },
-          { merge: true }
-        );
+  // useEffect(() => {
+  //   if (item.length === 0 && total !== 0) {
+  //     firebase
+  //       .firestore()
+  //       .collection("admin")
+  //       .doc("salary")
+  //       .set(
+  //         {
+  //           amount: {
+  //             day: firebase.firestore.FieldValue.increment(total),
+  //             month: firebase.firestore.FieldValue.increment(total),
+  //           },
+  //           last_update: firebase.firestore.FieldValue.serverTimestamp(),
+  //         },
+  //         { merge: true }
+  //       );
 
-      setTotal(0);
-    }
-  }, [item]);
+  //     setTotal(0);
+  //   }
+  // }, [item]);
 
   useEffect(() => {
-    console.log(item);
     counter !== null &&
       !changeOpen &&
       firebase
@@ -1049,7 +1117,14 @@ function Checkout() {
                 ))}
               </div>
             </div>
-            <div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-start",
+                alignItems: "center",
+                gap: 10,
+              }}
+            >
               <button
                 style={{
                   marginTop: 20,
@@ -1096,6 +1171,21 @@ function Checkout() {
               >
                 ขายเอง
               </button>
+              <button
+                style={{
+                  marginTop: 20,
+                  border: "none",
+                  background: "#0099FF",
+                  color: "white",
+                  padding: "20px 40px",
+                  borderRadius: 20,
+                  cursor: "pointer",
+                  outline: "none",
+                }}
+                onClick={() => setQrPay(true)}
+              >
+                แสกนจ่าย
+              </button>
             </div>
           </div>
 
@@ -1140,7 +1230,7 @@ function Checkout() {
                     fontSize: "48px",
                   }}
                 >
-                  <form
+                  {/* <form
                     onSubmit={(e) => {
                       e.preventDefault();
                       Payment();
@@ -1160,13 +1250,13 @@ function Checkout() {
                       id="money"
                       onChange={(e) => setMoney(e.target.value)}
                     />
-                  </form>
-                  {/* {money.join("").replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}
-                  {money.length > 0 && "บาท"} */}
+                  </form> */}
+                  {money.join("").replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}
+                  {money.length > 0 && "บาท"}
                 </h1>
               </div>
 
-              {/* <Numpad onPress={(number) => setMoney(number)} clear={clear} /> */}
+              <Numpad onPress={(number) => setMoney(number)} clear={clear} />
             </div>
 
             <div

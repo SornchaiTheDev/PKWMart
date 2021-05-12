@@ -12,14 +12,10 @@ function Print() {
 
   useEffect(() => {
     window.print();
+    history.replace(`/merchant/checkout?counter=${GlobalItem.counter}`);
     // setTimeout(() => {
-    history.replace(`/merchant/checkout?counter=${GlobalItem[0].counter}`);
     // }, 1000);
   }, []);
-
-  useEffect(() => {
-    console.log(GlobalItem[0]);
-  }, [GlobalItem]);
 
   const months = [
     "ม.ค",
@@ -35,7 +31,7 @@ function Print() {
     "พ.ย",
     "ธ.ค",
   ];
-  
+
   return (
     <>
       <div
@@ -51,6 +47,13 @@ function Print() {
         <h4 style={{ alignSelf: "center", fontWeight: "lighter" }}>
           มินิมาร์ท โรงเรียนภูเก็ตวิทยาลัย
         </h4>
+
+        {GlobalItem.type === "qr" && (
+          <h4 style={{ alignSelf: "center", fontWeight: "bold" }}>
+            แสกนจ่ายผ่านแอพ ได้เพย์
+          </h4>
+        )}
+
         <h4 style={{ fontWeight: "lighter" }}>
           {`${new Date().getUTCDate()} ${months[new Date().getUTCMonth()]} ${
             new Date().getFullYear() + 543
@@ -78,14 +81,15 @@ function Print() {
         >
           <h4>หมายเลขบิล</h4>
 
-          <h3>{GlobalItem[0].billNumber}</h3>
+          <h3>{GlobalItem.billNumber}</h3>
         </div>
 
         <h4 style={{ fontWeight: "lighter" }}>
           ===============================
         </h4>
-        {GlobalItem[0].item.map(({ name, amount, price }) => (
+        {GlobalItem.item.map(({ name, amount, price }) => (
           <div
+            key={name}
             style={{
               margin: 0,
               display: "flex",
@@ -97,8 +101,12 @@ function Print() {
             <div style={{ width: "50%", overflow: "hidden" }}>
               <h4 style={{ fontWeight: "lighter" }}>{name}</h4>
             </div>
-            <h4 style={{ fontWeight: "lighter" }}>x {amount.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}</h4>
-            <h4 style={{ fontWeight: "lighter" }}>{price.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")} บาท</h4>
+            <h4 style={{ fontWeight: "lighter" }}>
+              x {amount.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}
+            </h4>
+            <h4 style={{ fontWeight: "lighter" }}>
+              {price.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")} บาท
+            </h4>
           </div>
         ))}
       </div>
@@ -113,14 +121,30 @@ function Print() {
         }}
       >
         <h4 style={{ fontWeight: "lighter" }}>
-          สุทธิ {GlobalItem[0].price.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")} บาท
+          สุทธิ{" "}
+          {GlobalItem.price
+            .toString()
+            .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}{" "}
+          บาท
         </h4>
-        <h4 style={{ fontWeight: "lighter" }}>
-          รับเงินมา {GlobalItem[0].total.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")} บาท
-        </h4>
-        <h4 style={{ fontWeight: "lighter" }}>
-          เงินทอน {GlobalItem[0].change.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")} บาท
-        </h4>
+        {GlobalItem.type !== "qr" && (
+          <>
+            <h4 style={{ fontWeight: "lighter" }}>
+              รับเงินมา{" "}
+              {GlobalItem.total
+                .toString()
+                .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}{" "}
+              บาท
+            </h4>
+            <h4 style={{ fontWeight: "lighter" }}>
+              เงินทอน{" "}
+              {GlobalItem.change
+                .toString()
+                .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}{" "}
+              บาท
+            </h4>
+          </>
+        )}
       </div>
       <div
         style={{

@@ -29,6 +29,7 @@ function CustomerView() {
 
   const total = item.reduce((total, { price }) => total + price, 0);
   const [change, setChange] = useState(0);
+  const [qrBill, setQRBill] = useState("");
   const { counter } = useParams();
   useEffect(() => {
     const Fetch = async () => {
@@ -39,11 +40,20 @@ function CustomerView() {
         .collection("counter")
         .doc(counter)
         .onSnapshot(
-          (doc) => (setItem([...doc.data().now]), setChange(doc.data().change))
+          (doc) => (
+            setItem([...doc.data().now]),
+            setChange(doc.data().change, setQRBill(doc.data().qrBill))
+          )
         );
     };
     Fetch();
   }, []);
+
+  //variable
+  const time = new Date().getTime();
+  const price = 100;
+  const fcmToken =
+    "fABPHAW3XUG7vNn4KWRW97:APA91bFGbG4mExN8AXP7WUtlK4RvfqPG81tVEGWCOIkaLgtZlh4akkF8w8D98ivyI9qNnUMoyMRMYANqQYYNXQSlyxOB6ID9K6exySOhAD03ZsgJa3NKoyoWsnFTM6QtPMqChEexPUr6";
 
   return (
     <>
@@ -73,8 +83,7 @@ function CustomerView() {
           }}
         >
           <h3 style={{ marginTop: 50, fontSize: 48 }}>
-            รายการสินค้า{" "}
-            {item.length}
+            รายการสินค้า {item.length}
             ชิ้น
           </h3>
           <div
@@ -131,7 +140,7 @@ function CustomerView() {
               backgroundColor: "white",
               boxShadow: "0px 0px 5px 2px rgba(0, 0, 0, 0.2)",
               paddingLeft: "50px",
-              borderRadius: "40px",
+              borderRadius: "20px",
               padding: 20,
               display: "flex",
               justifyContent: "center",
@@ -140,20 +149,40 @@ function CustomerView() {
               gap: 20,
             }}
           >
-            <iframe
-              src="https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2FPKWSchoolOfficial%2Fposts%2F902029460368426&amp;width=300&amp;show_text=true&amp;height=574&amp;appId"
-              width="350"
-              height="574"
-              style={{ border: "none", overflow: "hidden" }}
-              scrolling="no"
-              frameborder="0"
-              allowfullscreen="true"
-              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-            ></iframe>
-            {/* <QRCode value="https://google.co.th" size={300} /> */}
-            {/* <h3>
-              แสกนจ่ายในแอพ <span style={{ color: "#0099FF" }}>ได้เพย์</span>
-            </h3> */}
+            {qrBill === "" ? (
+              <iframe
+                src="https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2FPKWSchoolOfficial%2Fposts%2F902029460368426&amp;width=300&amp;show_text=true&amp;height=574&amp;appId"
+                width="350"
+                height="574"
+                style={{ border: "none", overflow: "hidden" }}
+                scrolling="no"
+                frameborder="0"
+                allowfullscreen="true"
+                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+              ></iframe>
+            ) : (
+              <>
+                <h1>แสกนจ่ายตรงนี้เลย !</h1>
+                <div
+                  style={{
+                    background: "white",
+                    boxShadow: "0px 6px 1.5px 1px rgba(0,0,0,0.25)",
+                    padding: 20,
+                    borderRadius: 20,
+                  }}
+                >
+                  <QRCode
+                    bgColor="transparent"
+                    value={`660966353408:${total}:102:${qrBill}:${fcmToken}`}
+                    size={300}
+                  />
+                </div>
+                <h3>
+                  แสกนจ่ายในแอพ{" "}
+                  <span style={{ color: "#0099FF" }}>ได้เพย์</span>
+                </h3>
+              </>
+            )}
           </div>
           <div
             style={{
