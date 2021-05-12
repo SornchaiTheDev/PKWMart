@@ -548,10 +548,7 @@ const Custom = ({ open, close, setItem }) => {
 };
 
 function Checkout() {
-  const [item, setItem] = useState([
-    { name: "เทส", amount: 1, price: 20 },
-    { name: "เทส2", amount: 1, price: 40 },
-  ]);
+  const [item, setItem] = useState([]);
   const [show, setShow] = useState(false);
   const [money, setMoney] = useState([]);
   const [change, setChange] = useState(0);
