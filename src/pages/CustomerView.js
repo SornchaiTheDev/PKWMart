@@ -63,9 +63,8 @@ function CustomerView() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          width: "100%",
           minHeight: "100vh",
-          background: "#0099FF",
+          gap: 20,
         }}
       >
         <div
@@ -83,8 +82,7 @@ function CustomerView() {
           }}
         >
           <h3 style={{ marginTop: 50, fontSize: 48 }}>
-            รายการสินค้า {item.length}
-            ชิ้น
+            รายการสินค้า {item.length} ชิ้น
           </h3>
           <div
             style={{
@@ -109,16 +107,6 @@ function CustomerView() {
               ))}
             </div>
           </div>
-
-          {/* <div style={{ position: "absolute", bottom: 20, right: 30 }}>
-            <h3 style={{ fontSize: "3rem" }}>
-              รวมทั้งหมด{" "}
-              <span style={{ color: "#0099FF" }}>
-                {item.reduce((total, { price }) => total + price, 0)}
-              </span>{" "}
-              บาท
-            </h3>
-          </div> */}
         </div>
 
         <div
@@ -126,7 +114,6 @@ function CustomerView() {
             width: "100%",
             height: "90vh",
             marginRight: 20,
-            //   backgroundColor: "black",
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-around",
@@ -135,7 +122,7 @@ function CustomerView() {
         >
           <div
             style={{
-              minWidth: "80%",
+              width: "95%",
               minHeight: "60%",
               backgroundColor: "white",
               boxShadow: "0px 0px 5px 2px rgba(0, 0, 0, 0.2)",
@@ -150,16 +137,18 @@ function CustomerView() {
             }}
           >
             {qrBill === "" ? (
-              <iframe
-                src="https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2FPKWSchoolOfficial%2Fposts%2F902029460368426&amp;width=300&amp;show_text=true&amp;height=574&amp;appId"
-                width="350"
-                height="574"
-                style={{ border: "none", overflow: "hidden" }}
-                scrolling="no"
-                frameborder="0"
-                allowfullscreen="true"
-                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-              ></iframe>
+              <>
+                <iframe
+                  src="https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2FPKWSchoolOfficial%2Fposts%2F927637251140980&show_text=true&width=500"
+                  width="350"
+                  height="574"
+                  style={{ border: "none", overflow: "hidden" }}
+                  scrolling="no"
+                  frameborder="0"
+                  allowfullscreen="true"
+                  allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                ></iframe>
+              </>
             ) : (
               <>
                 <h1>แสกนจ่ายตรงนี้เลย !</h1>
@@ -173,7 +162,7 @@ function CustomerView() {
                 >
                   <QRCode
                     bgColor="transparent"
-                    value={`660966353408:${total}:102:${qrBill}:${fcmToken}`}
+                    value={`660966353408${total}B102${qrBill}`}
                     size={300}
                   />
                 </div>
@@ -187,43 +176,65 @@ function CustomerView() {
           <div
             style={{
               background: "white",
-              minWidth: "90%",
-              minHeight: "20%",
+              width: "100%",
+              height: "30%",
               borderRadius: 20,
               display: "flex",
-              justifyContent: "space-around",
+              justifyContent: "center",
               alignItems: "center",
-              flexDirection: "column",
+              flexDirection: "row",
+              boxShadow: "0px 0px 5px 2px rgba(0, 0, 0, 0.2)",
+              gap: 20,
             }}
           >
-            <h3 style={{ fontSize: "3rem" }}>
-              รวมทั้งหมด{" "}
-              <span style={{ color: "#0099FF" }}>
-                {item.reduce((total, { price }) => total + price, 0)}
-              </span>{" "}
-              บาท
-            </h3>
-            <h3 style={{ fontSize: "3rem" }}>
-              เงินทอน
-              <span style={{ color: "#0099FF" }}>{change}</span> บาท
-            </h3>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "flex-end",
+                flexDirection: "column",
+              }}
+            >
+              <h3 style={{ fontSize: "3rem" }}>รวมทั้งหมด</h3>
+              <h3 style={{ fontSize: "3rem" }}>เงินทอน</h3>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                flexDirection: "column",
+              }}
+            >
+              <div>
+                <span
+                  style={{
+                    color: "#0099FF",
+                    fontSize: "3rem",
+                    marginRight: 10,
+                  }}
+                >
+                  {item.reduce((total, { price }) => total + price, 0)}
+                </span>
+                <span style={{ fontSize: "3rem", fontWeight: "bold" }}>
+                  บาท
+                </span>
+              </div>
+              <div>
+                <span
+                  style={{
+                    color: "#0099FF",
+                    fontSize: "3rem",
+                    marginRight: 10,
+                  }}
+                >
+                  {change}
+                </span>{" "}
+                <span style={{ fontSize: "3rem", fontWeight: "bold" }}>
+                  บาท
+                </span>
+              </div>
+            </div>
           </div>
-          {/* <div
-          style={{
-            minWidth: "80%",
-            minHeight: "10%",
-            backgroundColor: "white",
-            boxShadow: "0px 0px 5px 2px rgba(0, 0, 0, 0.2)",
-            paddingLeft: "50px",
-            borderRadius: "40px",
-            padding: 20,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <h2>ขอบคุณที่ใช้บริการ PKW Mart 🤞</h2>
-        </div> */}
         </div>
       </div>
     </>

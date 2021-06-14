@@ -12,9 +12,10 @@ function Print() {
 
   useEffect(() => {
     window.print();
-    history.replace(`/merchant/checkout?counter=${GlobalItem.counter}`);
-    // setTimeout(() => {
-    // }, 1000);
+    setTimeout(() => {
+      history.replace(`/merchant/checkout?counter=${GlobalItem.counter}`);
+    }, 1000);
+    console.log(GlobalItem.counter);
   }, []);
 
   const months = [
@@ -40,6 +41,7 @@ function Print() {
           justifyContent: "center",
           alignItems: "center",
           flexDirection: "column",
+          background: "white",
           gap: 10,
         }}
       >
@@ -82,6 +84,26 @@ function Print() {
           <h4>หมายเลขบิล</h4>
 
           <h3>{GlobalItem.billNumber}</h3>
+        </div>
+
+        <div
+          style={{
+            margin: 0,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "400px",
+            flexDirection: "column",
+          }}
+        >
+          <h4>
+            บิลเครื่องที่{" "}
+            {GlobalItem.counter === "counter01@pkw.ac.th"
+              ? 1
+              : GlobalItem.counter === "counter02@pkw.ac.th"
+              ? 2
+              : "admin"}
+          </h4>
         </div>
 
         <h4 style={{ fontWeight: "lighter" }}>

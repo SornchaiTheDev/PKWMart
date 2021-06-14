@@ -3,15 +3,37 @@ import { useHistory } from "react-router-dom";
 import { Context } from "../../App";
 function End() {
   const { GlobalItem } = useContext(Context);
-  const { profit, total } = GlobalItem[0];
+  const { profit, total } = GlobalItem;
+  const today = new Date();
+  const last_open = new Date(GlobalItem.last_open.seconds * 1000);
   const history = useHistory();
-
-  console.log(GlobalItem);
+  const isToday =
+    today.getDate() +
+      today.getMonth() -
+      (last_open.getDate() + last_open.getMonth()) ===
+    0;
 
   useEffect(() => {
     window.print();
-    history.replace(`/merchant/checkout?counter=${GlobalItem[0].counter}`);
+    setTimeout(() => {
+      history.replace(`/merchant/checkout?counter=${GlobalItem.counter}`);
+    }, 1000);
   }, []);
+
+  const months = [
+    "ม.ค",
+    "ก.พ",
+    "มี.ค",
+    "เม.ย",
+    "พ.ค",
+    "มิ.ย",
+    "ก.ค",
+    "ส.ค",
+    "ก.ย",
+    "ต.ค",
+    "พ.ย",
+    "ธ.ค",
+  ];
 
   return (
     <div
@@ -20,11 +42,34 @@ function End() {
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
-        
       }}
     >
-      <h3>สรุปยอดการขายวันนี้</h3>
-      <h3>เคาท์เตอร์ที่ {GlobalItem[0].counter === "counter01@gmail.com" ? 1 : GlobalItem[0].counter === "counter02@gmail.com" ? 2 : "admin"}</h3>
+      <h3>สรุปยอดการขาย</h3>
+      {!isToday ? (
+        <h3>
+          {`${last_open.getUTCDate()} ${months[last_open.getUTCMonth()]} ${
+            last_open.getFullYear() + 543
+          } `}
+          {" - "}
+          {`${today.getUTCDate()} ${months[today.getUTCMonth()]} ${
+            today.getFullYear() + 543
+          } `}
+        </h3>
+      ) : (
+        <h3>
+          {`${today.getUTCDate()} ${months[today.getUTCMonth()]} ${
+            today.getFullYear() + 543
+          } `}
+        </h3>
+      )}
+      <h3>
+        เคาท์เตอร์ที่{" "}
+        {GlobalItem.counter === "counter01@pkw.ac.th"
+          ? 1
+          : GlobalItem.counter === "counter02@pkw.ac.th"
+          ? 2
+          : "admin"}
+      </h3>
       <div
         style={{
           display: "flex",
