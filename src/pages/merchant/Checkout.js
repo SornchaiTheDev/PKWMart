@@ -776,7 +776,7 @@ function Checkout() {
 
   useEffect(() => {
     const keyPress = (e) => {
-      (e.code === "NumpadDivide" || e.code === "Slash") &&
+      (e.code === "NumpadDivide" || e.code === "Slash" || e.code === "Space") &&
         document.getElementById("money").focus();
       if (e.code === "NumpadMultiply") {
         setMultiply("");
