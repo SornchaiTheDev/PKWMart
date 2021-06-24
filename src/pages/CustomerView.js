@@ -50,10 +50,10 @@ function CustomerView() {
   }, []);
 
   //variable
-  const time = new Date().getTime();
-  const price = 100;
-  const fcmToken =
-    "fABPHAW3XUG7vNn4KWRW97:APA91bFGbG4mExN8AXP7WUtlK4RvfqPG81tVEGWCOIkaLgtZlh4akkF8w8D98ivyI9qNnUMoyMRMYANqQYYNXQSlyxOB6ID9K6exySOhAD03ZsgJa3NKoyoWsnFTM6QtPMqChEexPUr6";
+  // const time = new Date().getTime();
+  // const price = 100;
+  // const fcmToken =
+  //   "fABPHAW3XUG7vNn4KWRW97:APA91bFGbG4mExN8AXP7WUtlK4RvfqPG81tVEGWCOIkaLgtZlh4akkF8w8D98ivyI9qNnUMoyMRMYANqQYYNXQSlyxOB6ID9K6exySOhAD03ZsgJa3NKoyoWsnFTM6QtPMqChEexPUr6";
 
   return (
     <>

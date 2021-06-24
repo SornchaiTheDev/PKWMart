@@ -509,6 +509,7 @@ const BillCancel = ({ show, close, bill }) => {
 
 const Custom = ({ open, close, setItem }) => {
   const [value, setValue] = useState("");
+
   return (
     <div
       style={{
@@ -538,7 +539,13 @@ const Custom = ({ open, close, setItem }) => {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            setItem(Math.abs(value));
+            const exactValue = value.split("+");
+            exactValue.shift();
+            const price = exactValue
+              .map((value) => parseInt(value))
+              .reduce((total, price) => price + total, 0);
+
+            setItem(Math.abs(price));
           }}
         >
           <input
@@ -788,7 +795,11 @@ function Checkout() {
         cookies.set("change", 0);
       }
 
-      if (e.code === "NumpadSubtract" || e.code === "Minus") {
+      if (
+        e.code === "NumpadSubtract" ||
+        e.code === "Minus" ||
+        e.code === "NumpadAdd"
+      ) {
         setCustom(true);
       }
     };
@@ -1041,15 +1052,15 @@ function Checkout() {
   // }, [item]);
 
   //Wait for Daipay
-  // useEffect(() => {
-  //   counter !== null &&
-  //     !changeOpen &&
-  //     firebase
-  //       .firestore()
-  //       .collection("counter")
-  //       .doc(counter)
-  //       .update({ now: item }, { merge: true });
-  // }, [item, counter]);
+  useEffect(() => {
+    counter !== null &&
+      !changeOpen &&
+      firebase
+        .firestore()
+        .collection("counter")
+        .doc(counter)
+        .update({ now: item }, { merge: true });
+  }, [item, counter]);
 
   useEffect(() => {
     changeOpen &&
