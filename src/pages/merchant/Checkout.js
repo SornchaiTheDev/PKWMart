@@ -18,7 +18,6 @@ import {
   faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 
-import { v4 as uuid } from "uuid";
 import Print from "./Print";
 
 const Alert = ({ show, onClick, change, msg }) => {
@@ -539,13 +538,17 @@ const Custom = ({ open, close, setItem }) => {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            const exactValue = value.split("+");
-            exactValue.shift();
-            const price = exactValue
-              .map((value) => parseInt(value))
-              .reduce((total, price) => price + total, 0);
 
-            setItem(Math.abs(price));
+            if (/\+/g.test(value)) {
+              const exactValue = value.split("+");
+              exactValue.shift();
+              const price = exactValue
+                .map((value) => parseInt(value))
+                .reduce((total, price) => price + total, 0);
+              setItem(Math.abs(price));
+            } else {
+              setItem(Math.abs(parseInt(value)));
+            }
           }}
         >
           <input
