@@ -10,7 +10,7 @@ import {
 import firebase from "../../firebase";
 import { VictoryChart, VictoryLine, VictoryAxis } from "victory";
 import "../../App.css";
-// firebase.firestore().useEmulator("localhost", 8080);
+
 function Dashboard() {
   const cookies = new Cookies();
   const history = useHistory();
@@ -77,8 +77,6 @@ function Dashboard() {
           width: "50%",
           flexWrap: "wrap",
           minHeight: "60vh",
-
-          // maxHeight: "79vh",
         }}
       >
         <div style={{ width: "100%" }}>
