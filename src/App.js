@@ -1,7 +1,6 @@
 import React, { useState, createContext } from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 
-import Login from "./pages/login";
 import Checkout from "./pages/merchant/Checkout";
 import Print from "./pages/merchant/Print";
 import End from "./pages/merchant/End";
@@ -20,14 +19,13 @@ function App() {
     <Context.Provider value={{ GlobalItem, setGlobalItem }}>
       <Router>
         <Switch>
-          <Route path="/" exact component={Login} />
+          <Route path="/" exact component={Admin} />
           <Route path="/merchant/checkout" exact component={Checkout} />
           <Route path="/merchant/print" exact component={Print} />
           <Route path="/merchant/end" exact component={End} />
           <Route path="/merchant/customer" exact component={CustomerView} />
           <Route path="/merchant/barcode" exact component={Barcode} />
           <Route path="/404" exact component={NotFound} />
-          <Route path="/admin" exact component={Admin} />
           <Route path="/admin/dashboard" exact component={Dashboard} />
           <Route path="/admin/stock" exact component={Stock} />
         </Switch>

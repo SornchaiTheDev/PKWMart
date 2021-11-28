@@ -1,23 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
-import Cookies from "universal-cookie";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCartArrowDown,
   faSignOutAlt,
+  faShoppingBag,
 } from "@fortawesome/free-solid-svg-icons";
 import firebase from "../../firebase";
 import { VictoryChart, VictoryLine, VictoryAxis } from "victory";
 import "../../App.css";
 
 function Dashboard() {
-  const cookies = new Cookies();
   const history = useHistory();
   const [user, setUser] = useState([]);
   const [salary, setSalary] = useState({});
   const [chart, setChart] = useState([]);
   const [hits, setHits] = useState([]);
-  const isAdmin = cookies.get("admin");
 
   useEffect(() => {
     firebase.auth().onAuthStateChanged((user) => {
@@ -240,6 +238,26 @@ function Dashboard() {
           >
             <FontAwesomeIcon icon={faCartArrowDown} size="1x" />
             <h3>จัดการสต็อก</h3>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 20,
+              background: "#0099FF",
+              padding: 10,
+              borderRadius: 6,
+              color: "white",
+              cursor: "pointer",
+            }}
+            onClick={() =>
+              history.push(`/merchant/checkout?counter=${user.email}`)
+            }
+          >
+            <FontAwesomeIcon icon={faShoppingBag} size="1x" />
+            <h3>เข้าสู่ร้านค้า</h3>
           </div>
         </div>
       </div>
