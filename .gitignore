@@ -8,6 +8,7 @@ firebase-debug.log*
 firebase-debug.*.log*
 
 
+
 # Firebase cache
 .firebase/
 
@@ -69,4 +70,4 @@ package-lock.json
 .env
 
 # build folder
-./build
+build/
