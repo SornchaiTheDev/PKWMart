@@ -135,16 +135,6 @@ function Dashboard() {
               </h1>
             </div>
 
-            {/* <div style={{ marginTop: 20 }}>
-              <h3>รายได้สัปดาห์นี้</h3>
-              <h1 style={{ fontSize: "3rem" }}>
-                {salary.day === undefined
-                  ? "กำลังโหลด"
-                  : `${salary.day
-                      .toString()
-                      .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")} บาท`}{" "}
-              </h1>
-            </div> */}
             <div style={{ marginTop: 20 }}>
               <h3>รายได้เดือนนี้</h3>
               <h1 style={{ fontSize: "3rem" }}>
@@ -165,7 +155,6 @@ function Dashboard() {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "flex-start",
-            // background : "gold"
           }}
         >
           <div style={{ width: "100%", flex: 0.5, height: 300 }}>
@@ -196,7 +185,6 @@ function Dashboard() {
             style={{
               width: "100%",
               height: "100%",
-              // background: "#0099FF",
               flex: 0.4,
               display: "flex",
               justifyContent: "flex-start",
@@ -255,24 +243,6 @@ function Dashboard() {
           >
             <FontAwesomeIcon icon={faCartArrowDown} size="1x" />
             <h3>จัดการสต็อก</h3>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 20,
-              background: "grey",
-              padding: 10,
-              borderRadius: 6,
-              color: "white",
-              cursor: "pointer",
-            }}
-            onClick={() => history.push("/admin/report/hub")}
-          >
-            <FontAwesomeIcon icon={faChartLine} size="1x" />
-            <h3>รายงาน</h3>
           </div>
         </div>
       </div>
