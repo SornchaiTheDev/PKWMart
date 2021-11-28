@@ -6,78 +6,12 @@ import { Context } from "../../App";
 import firebase from "../../firebase";
 import Cookies from "universal-cookie";
 
+import Alert from "../../components/Alert";
 import BarcodeScanner from "react-barcode-reader";
-import ChangeAlert from "../../components/ChangeAlert";
 import Numpad from "../../components/Numpad";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faBarcode,
-  faQrcode,
-  faArrowLeft,
-  faTimes,
-} from "@fortawesome/free-solid-svg-icons";
-
-import Print from "./Print";
-
-const Alert = ({ show, onClick, change, msg }) => {
-  return (
-    <div
-      style={{
-        position: "fixed",
-        backgroundColor: "rgba(0,0,0,0.5)",
-        minWidth: "100vw",
-        minHeight: "100vh",
-        display: show ? "flex" : "none",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: "white",
-          borderRadius: 50,
-          width: "500px",
-          height: "300px",
-          gap: 20,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <h1 style={{}}>เงินทอน</h1>
-          <h1 className="MediumText">
-            <span style={{ color: "#0099FF" }}>{change}</span> บาท
-          </h1>
-        </div>
-        <button
-          style={{
-            cursor: "pointer",
-            border: "none",
-            outline: "none",
-            backgroundColor: "#0099FF",
-            padding: "10px 100px",
-            borderRadius: 20,
-            fontSize: 28,
-            color: "white",
-          }}
-          onClick={() => onClick()}
-        >
-          ปิด
-        </button>
-      </div>
-    </div>
-  );
-};
+import { faQrcode, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 
 const Conclusion = ({ counter, show, close, setGlobalItem, history }) => {
   const [thousand, setThousand] = useState("");
@@ -412,7 +346,6 @@ const BillCancel = ({ show, close, bill }) => {
       .doc(barcode)
       .get()
       .then((doc) => {
-        // console.log(doc.data());
         if (doc.data().status === "normal") {
           bill({
             item: [...doc.data().items],
@@ -812,10 +745,6 @@ function Checkout() {
     return () => {
       document.removeEventListener("keydown", keyPress, false);
     };
-
-    const show = cookies.get("show");
-
-    setShow(show);
   }, []);
 
   useEffect(() => {
@@ -890,30 +819,6 @@ function Checkout() {
           counter: counter,
         })
         .catch((err) => alert(`Add Failed! ${err.code}`));
-
-      // await item.forEach(({ barId, amount, name }) => {
-      //   firebase
-      //     .firestore()
-      //     .collection("stock")
-      //     .doc(barId)
-      //     .update({
-      //       front_amount: firebase.firestore.FieldValue.increment(-amount),
-      //     });
-      //   // firebase
-      //   //   .firestore()
-      //   //   .collection("admin")
-      //   //   .doc("hits")
-      //   //   .collection("items")
-      //   //   .doc(name)
-      //   //   .set(
-      //   //     {
-      //   //       name: name,
-      //   //       amount: firebase.firestore.FieldValue.increment(amount),
-      //   //     },
-      //   //     { merge: true }
-      //   //   );
-      // });
-
       setChange(payIn - total);
 
       counter !== null &&
@@ -938,65 +843,6 @@ function Checkout() {
 
       history.replace("/merchant/print");
     }
-    // } else {
-    //   await firebase.firestore().collection("history").doc(bill).delete();
-
-    //   await firebase
-    //     .firestore()
-    //     .collection("history")
-    //     .doc(bill)
-    //     .set({
-    //       payIn: payIn,
-    //       items: item,
-    //       time: new Date(),
-    //       status: "normal",
-    //       price: total,
-    //       counter: voidCounter,
-    //     })
-    //     .then(() => {})
-    //     .catch((err) => alert(`Add Failed! ${err.code}`));
-
-    //   let price = 0;
-    //   for (let item of VoidItem) {
-    //     await firebase
-    //       .firestore()
-    //       .collection("stock")
-    //       .doc(item.barcode)
-    //       .get()
-    //       .then((doc) => (price += doc.data().price));
-    //   }
-
-    //   await firebase
-    //     .firestore()
-    //     .collection("counter")
-    //     .doc(voidCounter)
-    //     .update(
-    //       { salary: firebase.firestore.FieldValue.increment(-price) },
-    //       { merge: true }
-    //     )
-    //     .then(() => console.log("remove"));
-
-    //   await firebase
-    //     .firestore()
-    //     .collection("counter")
-    //     .doc(voidCounter)
-    //     .update(
-    //       { salary: firebase.firestore.FieldValue.increment(total) },
-    //       { merge: true }
-    //     )
-    //     .then(() => console.log("add"));
-
-    //   setGlobalItem({
-    //     item: item,
-    //     billNumber: bill,
-    //     billVoid: true,
-    //     total: payIn,
-    //     price: total,
-    //     change: payIn - total,
-    //   });
-
-    //   history.replace("/merchant/print");
-    // }
   };
 
   useEffect(async () => {
@@ -1006,53 +852,12 @@ function Checkout() {
         history.replace("/");
       }
     });
-
-    // await firebase
-    //   .firestore()
-    //   .collection("admin")
-    //   .doc("salary")
-    //   .get()
-    //   .then((doc) => {
-    //     const date = new Date(doc.data().last_update.seconds * 1000).getDate();
-    //     const today = new Date().getDate();
-
-    //     date !== today &&
-    //       firebase
-    //         .firestore()
-    //         .collection("admin")
-    //         .doc("salary")
-    //         .update({
-    //           amount: { day: 0, month: doc.data().amount.month },
-    //           last_update: firebase.firestore.FieldValue.serverTimestamp(),
-    //         });
-    //   });
   }, []);
 
   useEffect(() => {
     const total = item.reduce((total, { price }) => total + price, 0);
     setTotal(total);
   }, [item]);
-
-  // useEffect(() => {
-  //   if (item.length === 0 && total !== 0) {
-  //     firebase
-  //       .firestore()
-  //       .collection("admin")
-  //       .doc("salary")
-  //       .set(
-  //         {
-  //           amount: {
-  //             day: firebase.firestore.FieldValue.increment(total),
-  //             month: firebase.firestore.FieldValue.increment(total),
-  //           },
-  //           last_update: firebase.firestore.FieldValue.serverTimestamp(),
-  //         },
-  //         { merge: true }
-  //       );
-
-  //     setTotal(0);
-  //   }
-  // }, [item]);
 
   //Wait for Daipay
   useEffect(() => {
@@ -1157,7 +962,6 @@ function Checkout() {
         history={history}
       />
       <QRScanStatus open={qrPay} />
-      {/* <ChangeAlert counterId="test1" open={changeOpen} /> */}
       <BarcodeScanner onScan={!billVoid && Scann} />
       <Alert
         show={change > 0}
