@@ -14,9 +14,10 @@ import Custom from "../../components/Custom";
 import QRScanStatus from "../../components/QRScanStatus";
 
 function Checkout() {
+  const cookies = new Cookies();
   const [item, setItem] = useState([]);
   const [money, setMoney] = useState([]);
-  const [change, setChange] = useState(0);
+  const [change, setChange] = useState(cookies.get("change"));
   const [user, setUser] = useState([]);
   const [clear, setClear] = useState(0);
   const [total, setTotal] = useState(0);
@@ -34,9 +35,8 @@ function Checkout() {
   const [qrPay, setQrPay] = useState(false);
   const [qrBill, setQRBill] = useState("");
   const history = useHistory();
-  const cookies = new Cookies();
 
-  const getChange = cookies.get("change");
+  [];
   const { GlobalItem, setGlobalItem } = useContext(Context);
 
   useEffect(() => {
@@ -160,10 +160,6 @@ function Checkout() {
       document.removeEventListener("keydown", keyPress, false);
     };
   }, []);
-
-  useEffect(() => {
-    setChange(getChange);
-  }, [getChange]);
 
   useEffect(() => {
     const scroll = document.getElementById("items");
