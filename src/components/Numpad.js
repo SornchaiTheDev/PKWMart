@@ -2,16 +2,22 @@ import React, { useState, useEffect } from "react";
 import "../App.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBackspace } from "@fortawesome/free-solid-svg-icons";
-function Numpad({ onPress, clear }) {
+function Numpad({ onPress, money }) {
   const [number, setNumber] = useState([]);
 
   useEffect(() => {
-    onPress(number);
+    onPress(number.join(""));
   }, [number]);
 
   useEffect(() => {
-    setNumber([]);
-  }, [clear]);
+    setNumber(money.length > 0 && money.split(""));
+    if (money.length === 0) setNumber([]);
+  }, [money]);
+  
+  const backWard = () => {
+    setNumber((prev) => prev.slice(0, -1));
+  };
+
   return (
     <div className="change-form">
       <div className="payIn" onClick={() => setNumber((prev) => [...prev, 1])}>
@@ -48,17 +54,7 @@ function Numpad({ onPress, clear }) {
       >
         0
       </div>
-      <div
-        className="payIn"
-        // style={{ gridColumnStart: 3, gridColumnEnd: 6 }}
-        onClick={() =>
-          setNumber((prev) => {
-            const old = [...prev];
-            old.pop();
-            return [...old];
-          })
-        }
-      >
+      <div className="payIn" onClick={backWard}>
         <FontAwesomeIcon icon={faBackspace} />
       </div>
     </div>

@@ -16,10 +16,9 @@ import QRScanStatus from "../../components/QRScanStatus";
 function Checkout() {
   const cookies = new Cookies();
   const [item, setItem] = useState([]);
-  const [money, setMoney] = useState([]);
+  const [money, setMoney] = useState("");
   const [change, setChange] = useState(cookies.get("change"));
   const [user, setUser] = useState([]);
-  const [clear, setClear] = useState(0);
   const [total, setTotal] = useState(0);
   const [changeOpen, setChangeOpen] = useState(false);
   const [closeShop, setCloseShop] = useState(false);
@@ -36,7 +35,6 @@ function Checkout() {
   const [qrBill, setQRBill] = useState("");
   const history = useHistory();
 
-  [];
   const { GlobalItem, setGlobalItem } = useContext(Context);
 
   useEffect(() => {
@@ -167,11 +165,7 @@ function Checkout() {
   }, [item]);
 
   const BillDelete = async () => {
-    if (bill === "") {
-      setItem([]);
-      setMoney([]);
-      setClear(Math.random());
-    } else {
+    if (bill !== "") {
       await firebase
         .firestore()
         .collection("history")
@@ -196,12 +190,11 @@ function Checkout() {
               { merge: true }
             )
             .then(() => console.log("remove"));
-
-          setItem([]);
-          setMoney([]);
-          setBill("");
         });
     }
+    setItem([]);
+    setMoney("");
+    setBill("");
   };
 
   const Payment = async () => {
@@ -552,15 +545,15 @@ function Checkout() {
                   wordWrap: "break-word",
                 }}
               >
-                <h1
-                  style={{
-                    fontSize: "48px",
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    Payment();
                   }}
                 >
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      Payment();
+                  <div
+                    style={{
+                      position: "relative",
                     }}
                   >
                     <input
@@ -572,20 +565,27 @@ function Checkout() {
                         fontSize: 18,
                         padding: "10px 16px",
                       }}
-                      type="number"
-                      value={money}
+                      type="text"
+                      value={money.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}
                       id="money"
-                      onChange={(e) => setMoney(e.target.value)}
+                      onChange={(e) =>
+                        setMoney(e.target.value.replace(/,/g, ""))
+                      }
                     />
-                  </form>
-                  {typeof money === "object"
-                    ? money.join("").replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
-                    : money}
-                  {money.length > 0 && "บาท"}
-                </h1>
+                    <div
+                      style={{
+                        position: "absolute",
+                        right: 10,
+                        top: 5,
+                      }}
+                    >
+                      <h2 style={{}}>฿</h2>
+                    </div>
+                  </div>
+                </form>
               </div>
 
-              <Numpad onPress={(number) => setMoney(number)} clear={clear} />
+              <Numpad onPress={(number) => setMoney(number)} money={money} />
             </div>
 
             <div
