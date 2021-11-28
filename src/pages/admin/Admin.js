@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
 import "../../App.css";
-
 import firebase from "../../firebase";
-
 import { useHistory } from "react-router-dom";
 import Cookies from "universal-cookie";
+
 function Admin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

@@ -1,13 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useHistory } from "react-router-dom";
-import Cookies from "universal-cookie";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "../App.css";
-import {
-  faTrash,
-  faArrowLeft,
-  faPlus,
-} from "@fortawesome/free-solid-svg-icons";
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import firebase from "../firebase";
 
 import Alert from "../components/Alert";
@@ -23,7 +17,6 @@ const Items = ({
   addItem,
   doc,
   success,
-  barcodes,
 }) => {
   const [barcode, setBarcode] = useState("");
   const [name, setName] = useState("");
@@ -73,7 +66,7 @@ const Items = ({
         .collection("stock")
         .doc(barcode)
         .set({
-          barcode : barcode,
+          barcode: barcode,
           name: name,
           price: parseInt(price),
           front_amount: 0,

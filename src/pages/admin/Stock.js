@@ -1,33 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import Cookies from "universal-cookie";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import "../../App.css";
-import {
-  faTrash,
-  faArrowLeft,
-  faPlus,
-} from "@fortawesome/free-solid-svg-icons";
-import "../../App.css";
+import { faArrowLeft, faPlus } from "@fortawesome/free-solid-svg-icons";
 import firebase from "../../firebase";
-import Alert from "../../components/Alert";
 import Popup from "../../components/Popup";
 import Items from "../../components/Stock_Item";
-// firebase.firestore().useEmulator("localhost", 8080);
+import "../../App.css";
 
 function Stock() {
-  const cookies = new Cookies();
   const history = useHistory();
   const [user, setUser] = useState([]);
   const [front, setFront] = useState(true);
   const [addItem, setAddItem] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [last, setLast] = useState(null);
-  const [show, setShow] = useState(false);
   const [frontItem, setFrontItem] = useState(false);
   const [stockItem, setStockItem] = useState(false);
   const [count, setCount] = useState(0);
-  const [read, setRead] = useState(0);
   const [success, setSuccess] = useState(0);
 
   //All Items
@@ -55,13 +44,11 @@ function Stock() {
         let last;
         docs.forEach((doc) => {
           doc.id !== "count" && data.push({ ...doc.data(), id: doc.id });
-          setRead((prev) => prev + 1);
 
           last = doc.data().createdAt;
         });
-        setItem((prev) => [...data]);
+        setItem(() => [...data]);
         setLast(last);
-        // console.log(JSON.stringify(data[0]));
       });
 
     firebase
@@ -69,13 +56,9 @@ function Stock() {
       .collection("stock")
       .doc("count")
       .get()
-      // .onSnapshot((doc) => setCount(doc.data().amount));
       .then((doc) => setCount(doc.data().amount));
   }, [success]);
 
-  // useEffect(() => {
-  //   console.log(last)
-  // },[last])
   const infiniteLoad = (e) => {
     const { window } = e.currentTarget;
 
@@ -114,7 +97,7 @@ function Stock() {
   };
   useEffect(() => {
     window.addEventListener("scroll", infiniteLoad);
-    console.log(item)
+    console.log(item);
     return () => window.removeEventListener("scroll", infiniteLoad);
   }, [last]);
 
@@ -244,7 +227,6 @@ function Stock() {
             >
               <div
                 style={{
-                  // width: "100px",
                   padding: 20,
                   borderRadius: 20,
                   display: front ? "flex" : "none",
@@ -280,7 +262,6 @@ function Stock() {
               </div>
               <div
                 style={{
-                  // width: "100px",
                   padding: 20,
                   borderRadius: 20,
                   display: !front ? "flex" : "none",
@@ -327,33 +308,31 @@ function Stock() {
                   ? b.front_item - a.front_item
                   : b.stock_item - a.stock_item
               )
-              .map(
-                ({ name, barcode, price, front_amount, stock_amount, id }) => (
-                  <Items
-                    key={id}
-                    doc={id}
-                    item_barcode={id}
-                    item_name={name.toString()}
-                    item_price={price}
-                    front_amount={front_amount}
-                    stock_amount={stock_amount}
-                    front={front}
-                    removeItem={(item_name) => (
-                      setItem((prev) =>
-                        prev.filter(({ name }) => name !== item_name)
-                      ),
-                      firebase
-                        .firestore()
-                        .collection("stock")
-                        .doc("count")
-                        .update({
-                          amount: firebase.firestore.FieldValue.increment(-1),
-                        }),
-                      setSuccess((prev) => prev - 1)
-                    )}
-                  />
-                )
-              )}
+              .map(({ name, price, front_amount, stock_amount, id }) => (
+                <Items
+                  key={id}
+                  doc={id}
+                  item_barcode={id}
+                  item_name={name.toString()}
+                  item_price={price}
+                  front_amount={front_amount}
+                  stock_amount={stock_amount}
+                  front={front}
+                  removeItem={(item_name) => (
+                    setItem((prev) =>
+                      prev.filter(({ name }) => name !== item_name)
+                    ),
+                    firebase
+                      .firestore()
+                      .collection("stock")
+                      .doc("count")
+                      .update({
+                        amount: firebase.firestore.FieldValue.increment(-1),
+                      }),
+                    setSuccess((prev) => prev - 1)
+                  )}
+                />
+              ))}
             {isLoading && <h2>กำลังโหลด</h2>}
           </div>
         </div>

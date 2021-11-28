@@ -1,12 +1,8 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { Context } from "../../App";
 import { useHistory } from "react-router-dom";
-import QRCode from "react-qr-code";
-import Barcode from "react-barcode";
-// import Cookies from 'Cook'
 
 function Print() {
-  const [month, setMonth] = useState("");
   const { GlobalItem } = useContext(Context);
   const history = useHistory();
 

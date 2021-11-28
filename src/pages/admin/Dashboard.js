@@ -4,7 +4,6 @@ import Cookies from "universal-cookie";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCartArrowDown,
-  faChartLine,
   faSignOutAlt,
 } from "@fortawesome/free-solid-svg-icons";
 import firebase from "../../firebase";

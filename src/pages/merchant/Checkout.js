@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useContext } from "react";
-import "../../App.css";
 import Item from "../../components/Item";
 import { useHistory } from "react-router-dom";
 import { Context } from "../../App";
@@ -12,6 +11,7 @@ import Numpad from "../../components/Numpad";
 import BillCancel from "../../components/BillCancel";
 import Custom from "../../components/Custom";
 import QRScanStatus from "../../components/QRScanStatus";
+import "../../App.css";
 
 function Checkout() {
   const cookies = new Cookies();

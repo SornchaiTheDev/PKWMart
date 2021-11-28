@@ -1,36 +1,15 @@
-import React, { useState, useEffect, useContext } from "react";
-import "../App.css";
+import React, { useState, useEffect } from "react";
 import Item from "../components/Item";
 import firebase from "../firebase";
 import QRCode from "react-qr-code";
-import Cookies from "universal-cookie";
-import { useParams } from "react-router-dom";
-
-const QRPay = () => {
-  return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        position: "fixed",
-        background: "rgba(0,0,0,0.5)",
-        width: "100vw",
-        height: "100vh",
-        zIndex: 9999,
-      }}
-    ></div>
-  );
-};
+import "../App.css";
 
 function CustomerView() {
   const [item, setItem] = useState([]);
-  const cookies = new Cookies();
-
-  const total = item.reduce((total, { price }) => total + price, 0);
   const [change, setChange] = useState(0);
   const [qrBill, setQRBill] = useState("");
-  const { counter } = useParams();
+  const total = item.reduce((total, { price }) => total + price, 0);
+
   useEffect(() => {
     const Fetch = async () => {
       const url = new URL(window.location.href);
@@ -49,15 +28,8 @@ function CustomerView() {
     Fetch();
   }, []);
 
-  //variable
-  // const time = new Date().getTime();
-  // const price = 100;
-  // const fcmToken =
-  //   "fABPHAW3XUG7vNn4KWRW97:APA91bFGbG4mExN8AXP7WUtlK4RvfqPG81tVEGWCOIkaLgtZlh4akkF8w8D98ivyI9qNnUMoyMRMYANqQYYNXQSlyxOB6ID9K6exySOhAD03ZsgJa3NKoyoWsnFTM6QtPMqChEexPUr6";
-
   return (
     <>
-      {/* <QRPay /> */}
       <div
         style={{
           display: "flex",
