@@ -15,187 +15,39 @@ import QRScanStatus from "../../components/QRScanStatus";
 
 function Checkout() {
   const cookies = new Cookies();
-  const [item, setItem] = useState([]);
-  const [money, setMoney] = useState("");
-  const [change, setChange] = useState(cookies.get("change"));
+
+  // Validate User
   const [user, setUser] = useState([]);
-  const [total, setTotal] = useState(0);
-  const [changeOpen, setChangeOpen] = useState(false);
-  const [closeShop, setCloseShop] = useState(false);
+
+  // Checkout Essentail
   const [multiply, setMultiply] = useState(1);
   const [voidCounter, setVoidCounter] = useState("");
-  const [billVoid, setBillVoid] = useState(false);
-  const [VoidItem, setVoidItem] = useState([]);
   const [counter, setCounter] = useState(null);
-  const [custom, setCustom] = useState(false);
   const [bill, setBill] = useState("");
-  const [countdown, setCountdown] = useState(60);
+  const [item, setItem] = useState([]);
+  const [money, setMoney] = useState("");
+  const [total, setTotal] = useState(0);
+  const [change, setChange] = useState(cookies.get("change"));
+
+  // PopUp Status
   const [checkout, setCheckout] = useState(false);
   const [qrPay, setQrPay] = useState(false);
+  const [custom, setCustom] = useState(false);
+  const [closeShop, setCloseShop] = useState(false);
+  const [billVoid, setBillVoid] = useState(false);
+
+  // QR Pay
+  const [countdown, setCountdown] = useState(60);
   const [qrBill, setQRBill] = useState("");
   const history = useHistory();
 
-  const { GlobalItem, setGlobalItem } = useContext(Context);
+  const { setGlobalItem } = useContext(Context);
 
   useEffect(() => {
-    const Fetch = async () => {
-      const url = new URL(window.location.href);
-      const counter = url.searchParams.get("counter");
-      setCounter(counter);
-      await firebase
-        .firestore()
-        .collection("counter")
-        .doc(counter)
-        .set({ qrBill: "" }, { merge: true });
-    };
-    Fetch();
+    const url = new URL(window.location.href);
+    const counter = url.searchParams.get("counter");
+    setCounter(counter);
   }, []);
-
-  //QR Payment
-
-  useEffect(() => {
-    const getStatus = async () => {
-      const response = await fetch(
-        `https://asia-south1-daipay.cloudfunctions.net/QRCheck?qr=${qrBill}&token=testtoken`
-      );
-
-      const data = await response.json();
-
-      if (data.status === "success") {
-        QRPayFunc();
-        await firebase
-          .firestore()
-          .collection("counter")
-          .doc(counter)
-          .set({ qrBill: "" }, { merge: true });
-      }
-    };
-    const timeout = setTimeout(() => {
-      qrPay && item.length > 0 && qrBill !== "" && getStatus();
-      setCountdown((prev) => prev - 1);
-    }, 1000);
-    return () => clearTimeout(timeout);
-  }, [countdown, qrBill]);
-
-  useEffect(() => {
-    const QRbillNumber = `${new Date().getDate()}${new Date().getMonth()}${new Date().getHours()}${new Date().getMinutes()}${new Date().getSeconds()}`;
-    setQRBill(QRbillNumber);
-  }, []);
-
-  useEffect(() => {
-    const QRGen = async () => {
-      if (qrPay) {
-        const qrCreate = await fetch(
-          `https://asia-south1-daipay.cloudfunctions.net/QRGen?qr=${qrBill}&token=testtoken`
-        );
-        const data = await qrCreate.json();
-        if (data.status === "success") {
-          await firebase
-            .firestore()
-            .collection("counter")
-            .doc(counter)
-            .set({ qrBill: qrBill }, { merge: true });
-        }
-      }
-    };
-    qrPay && QRGen();
-  }, [qrPay]);
-
-  const QRPayFunc = async () => {
-    setCheckout(true);
-    await firebase
-      .firestore()
-      .collection("e-history")
-      .doc(qrBill)
-      .set({
-        items: item,
-        time: new Date(),
-        status: "normal",
-        price: total,
-        counter: counter,
-      })
-      .then(() => {})
-      .catch((err) => alert(`Add Failed! ${err.code}`));
-
-    setGlobalItem({
-      type: "qr",
-      item: item,
-      billNumber: qrBill,
-      price: total,
-      counter: counter,
-    });
-
-    history.replace("/merchant/print");
-  };
-  //QR Payment --- End
-
-  useEffect(() => {
-    const keyPress = (e) => {
-      (e.code === "NumpadDivide" || e.code === "Slash" || e.code === "Space") &&
-        document.getElementById("money").focus();
-      if (e.code === "NumpadMultiply") {
-        setMultiply("");
-        document.getElementById("multiply").focus();
-      }
-
-      if (e.code === "NumpadEnter") {
-        setChange(0);
-        cookies.set("change", 0);
-      }
-
-      if (
-        e.code === "NumpadSubtract" ||
-        e.code === "Minus" ||
-        e.code === "NumpadAdd"
-      ) {
-        setCustom(true);
-      }
-    };
-
-    document.addEventListener("keydown", keyPress, false);
-
-    return () => {
-      document.removeEventListener("keydown", keyPress, false);
-    };
-  }, []);
-
-  useEffect(() => {
-    const scroll = document.getElementById("items");
-    scroll.scrollTop = scroll.scrollHeight;
-  }, [item]);
-
-  const BillDelete = async () => {
-    if (bill !== "") {
-      await firebase
-        .firestore()
-        .collection("history")
-        .doc(bill)
-        .update({ status: "cancel" }, { merge: true })
-        .then(() => console.log("success"));
-
-      await firebase
-        .firestore()
-        .collection("history")
-        .doc(bill)
-        .get()
-        .then(async (doc) => {
-          const price = doc.data().price;
-
-          await firebase
-            .firestore()
-            .collection("counter")
-            .doc(voidCounter)
-            .update(
-              { salary: firebase.firestore.FieldValue.increment(-price) },
-              { merge: true }
-            )
-            .then(() => console.log("remove"));
-        });
-    }
-    setItem([]);
-    setMoney("");
-    setBill("");
-  };
 
   const Payment = async () => {
     if (counter == null) return alert("err !");
@@ -247,6 +99,149 @@ function Checkout() {
     }
   };
 
+  const BillDelete = async () => {
+    if (bill !== "") {
+      await firebase
+        .firestore()
+        .collection("history")
+        .doc(bill)
+        .update({ status: "cancel" }, { merge: true })
+        .then(() => console.log("success"));
+
+      await firebase
+        .firestore()
+        .collection("history")
+        .doc(bill)
+        .get()
+        .then(async (doc) => {
+          const price = doc.data().price;
+
+          await firebase
+            .firestore()
+            .collection("counter")
+            .doc(voidCounter)
+            .update(
+              { salary: firebase.firestore.FieldValue.increment(-price) },
+              { merge: true }
+            )
+            .then(() => console.log("remove"));
+        });
+    }
+    setItem([]);
+    setMoney("");
+    setBill("");
+  };
+
+  //QR Payment
+  useEffect(() => {
+    const QRGen = async () => {
+      const qrBillGen = `${new Date().getDate()}${new Date().getMonth()}${new Date().getHours()}${new Date().getMinutes()}${new Date().getSeconds()}`;
+      setQRBill(qrBillGen);
+      if (qrPay) {
+        const qrCreate = await fetch(
+          `https://asia-south1-daipay.cloudfunctions.net/QRGen?qr=${qrBillGen}&token=testtoken`
+        );
+        const data = await qrCreate.json();
+        if (data.status === "success") {
+          await firebase
+            .firestore()
+            .collection("counter")
+            .doc(counter)
+            .set({ qrBill: qrBillGen }, { merge: true });
+        }
+      }
+    };
+    qrPay && QRGen();
+  }, [qrPay]);
+
+  useEffect(() => {
+    const getStatus = async () => {
+      const response = await fetch(
+        `https://asia-south1-daipay.cloudfunctions.net/QRCheck?qr=${qrBill}&token=testtoken`
+      );
+
+      const data = await response.json();
+
+      const QRPayFunc = async () => {
+        setCheckout(true);
+        await firebase
+          .firestore()
+          .collection("e-history")
+          .doc(qrBill)
+          .set({
+            items: item,
+            time: new Date(),
+            status: "normal",
+            price: total,
+            counter: counter,
+          })
+          .then(() => {})
+          .catch((err) => alert(`Add Failed! ${err.code}`));
+
+        setGlobalItem({
+          type: "qr",
+          item: item,
+          billNumber: qrBill,
+          price: total,
+          counter: counter,
+        });
+
+        history.replace("/merchant/print");
+      };
+
+      if (data.status === "success") {
+        QRPayFunc();
+        await firebase
+          .firestore()
+          .collection("counter")
+          .doc(counter)
+          .set({ qrBill: "" }, { merge: true });
+      }
+    };
+    const timeout = setTimeout(() => {
+      qrBill !== "" && getStatus();
+      setCountdown((prev) => prev - 1);
+    }, 1000);
+    return () => clearTimeout(timeout);
+  }, [countdown, qrBill]);
+
+  //QR Payment --- End
+
+  useEffect(() => {
+    const keyPress = (e) => {
+      (e.code === "NumpadDivide" || e.code === "Slash" || e.code === "Space") &&
+        document.getElementById("money").focus();
+      if (e.code === "NumpadMultiply") {
+        setMultiply("");
+        document.getElementById("multiply").focus();
+      }
+
+      if (e.code === "NumpadEnter") {
+        setChange(0);
+        cookies.set("change", 0);
+      }
+
+      if (
+        e.code === "NumpadSubtract" ||
+        e.code === "Minus" ||
+        e.code === "NumpadAdd"
+      ) {
+        setCustom(true);
+      }
+    };
+
+    document.addEventListener("keydown", keyPress, false);
+
+    return () => {
+      document.removeEventListener("keydown", keyPress, false);
+    };
+  }, []);
+
+  useEffect(() => {
+    const scroll = document.getElementById("items");
+    scroll.scrollTop = scroll.scrollHeight;
+  }, [item]);
+
   useEffect(async () => {
     firebase.auth().onAuthStateChanged((user) => {
       setUser(user);
@@ -256,15 +251,15 @@ function Checkout() {
     });
   }, []);
 
+  // Update Total Price
   useEffect(() => {
     const total = item.reduce((total, { price }) => total + price, 0);
     setTotal(total);
   }, [item]);
 
-  //Wait for Daipay
+  //Update Customer View Items
   useEffect(() => {
     counter !== null &&
-      !changeOpen &&
       firebase
         .firestore()
         .collection("counter")
@@ -272,25 +267,18 @@ function Checkout() {
         .update({ now: item }, { merge: true });
   }, [item, counter]);
 
+  // Update Customer View Change
   useEffect(() => {
-    changeOpen &&
-      counter !== null &&
+    counter !== null &&
       item.length === 0 &&
       firebase
         .firestore()
         .collection("counter")
         .doc(counter)
         .update({ change: 0 }, { merge: true });
+  }, [change]);
 
-    !changeOpen &&
-      counter !== null &&
-      firebase
-        .firestore()
-        .collection("counter")
-        .doc(counter)
-        .update({ change: 0 }, { merge: true });
-  }, [changeOpen]);
-
+  // Scan Barcode To Add Item
   const Scann = async (data) => {
     let amount = 1;
     if (multiply !== null) amount = multiply;
@@ -437,11 +425,6 @@ function Checkout() {
                     amount={amount}
                     price={price}
                     del={({ id, barcode, amount }) => {
-                      bill !== "" &&
-                        setVoidItem((prev) => [
-                          ...prev,
-                          { barcode: barcode, amount: amount },
-                        ]);
                       setItem((prev) =>
                         prev.filter((data, index) => index !== id)
                       );
