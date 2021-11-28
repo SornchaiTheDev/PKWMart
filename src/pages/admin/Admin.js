@@ -47,11 +47,6 @@ function Admin() {
         );
       setSubmit(false);
     }
-    // await firebase
-    //   .auth()
-    //   .signInWithEmailAndPassword(email, password)
-    //   .then(() => console.log("signIn"))
-    //   .catch((err) => alert(err.code)),
   };
   return (
     <div className="container" id="form">
