@@ -15,7 +15,6 @@ import QRScanStatus from "../../components/QRScanStatus";
 
 function Checkout() {
   const [item, setItem] = useState([]);
-  const [show, setShow] = useState(false);
   const [money, setMoney] = useState([]);
   const [change, setChange] = useState(0);
   const [user, setUser] = useState([]);
@@ -218,7 +217,6 @@ function Checkout() {
 
     const payIn = typeof money === "object" ? parseInt(money.join("")) : money;
 
-    // if (bill === "") {
     if (payIn >= total) {
       setCheckout(true);
       await firebase

@@ -1,5 +1,3 @@
-import React, { useState, useEffect } from "react";
-
 const Alert = ({ show, onClick, change, msg }) => {
   return (
     <div
