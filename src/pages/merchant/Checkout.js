@@ -534,37 +534,20 @@ function Checkout() {
                     Payment();
                   }}
                 >
-                  <div
+                  <input
                     style={{
-                      position: "relative",
+                      backgroundColor: "white",
+                      borderRadius: 20,
+                      border: "1px solid black",
+                      outline: "none",
+                      fontSize: 18,
+                      padding: "10px 16px",
                     }}
-                  >
-                    <input
-                      style={{
-                        backgroundColor: "white",
-                        borderRadius: 20,
-                        border: "1px solid black",
-                        outline: "none",
-                        fontSize: 18,
-                        padding: "10px 16px",
-                      }}
-                      type="text"
-                      value={money.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}
-                      id="money"
-                      onChange={(e) =>
-                        setMoney(e.target.value.replace(/,/g, ""))
-                      }
-                    />
-                    <div
-                      style={{
-                        position: "absolute",
-                        right: 10,
-                        top: 5,
-                      }}
-                    >
-                      <h2 style={{}}>฿</h2>
-                    </div>
-                  </div>
+                    type="text"
+                    value={money.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}
+                    id="money"
+                    onChange={(e) => setMoney(e.target.value.replace(/,/g, ""))}
+                  />
                 </form>
               </div>
 
