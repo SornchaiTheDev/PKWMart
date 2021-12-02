@@ -11,7 +11,6 @@ const Items = ({
   item_name,
   item_price,
   stock_amount,
-  doc,
   removeItem,
 }) => {
   const [item, setItem] = useState({
@@ -32,7 +31,6 @@ const Items = ({
       ? (edit = true)
       : (edit = false);
 
-    console.log(edit);
     setIsEdit(edit);
   }, [item.name, item.barcode, item.price, item.stock_amount]);
 

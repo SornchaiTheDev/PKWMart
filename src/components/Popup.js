@@ -186,9 +186,6 @@ const Popup = ({ add, close, stock }) => {
     item !== "" && item_check();
   }, [item, exist]);
 
-  useEffect(() => {
-    console.log(exist);
-  }, [exist]);
   return (
     <>
       {item && exist ? (

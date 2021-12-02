@@ -189,8 +189,9 @@ function Dashboard() {
             }}
           >
             <h3 style={{ marginTop: 20 }}>สินค้าขายดีสุดในสัปดาห์นี้</h3>
-            {hits.map(({ name, amount }) => (
+            {hits.map(({ name, amount }, index) => (
               <div
+                key={index}
                 style={{
                   minWidth: "60%",
                   display: "flex",

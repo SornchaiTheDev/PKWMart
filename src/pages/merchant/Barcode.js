@@ -36,12 +36,13 @@ function BarcodeGen() {
         justifyContent: "flex-start",
         alignItems: "flex-start",
         flexDirection: "column",
-        flexWrap : "wrap",
-        height : "100vh"
+        flexWrap: "wrap",
+        height: "100vh",
       }}
     >
       {item.map(({ name }, index) => (
         <div
+          key={index}
           style={{
             display: "flex",
             justifyContent: "center",

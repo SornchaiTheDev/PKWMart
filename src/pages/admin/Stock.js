@@ -5,7 +5,6 @@ import { faArrowLeft, faPlus } from "@fortawesome/free-solid-svg-icons";
 import firebase from "../../firebase";
 import Popup from "../../components/Popup";
 import Items from "../../components/Stock_Item";
-import StockMenu from "../../components/StockMenu";
 import AddItem from "../../components/AddItem";
 import EditPopup from "../../components/EditPopup";
 import "../../App.css";
@@ -244,29 +243,26 @@ function Stock() {
             {item.length === 0 && <h3>ไม่มีสินค้า</h3>}
             {item
               .sort((a, b) => b.stock_item - a.stock_item)
-              .map(({ name, price, stock_amount, id }) => (
-                <>
-                  <Items
-                    key={id}
-                    doc={id}
-                    item_barcode={id}
-                    item_name={name.toString()}
-                    item_price={price}
-                    stock_amount={stock_amount}
-                    removeItem={(item_name) => (
-                      setItem((prev) =>
-                        prev.filter(({ name }) => name !== item_name)
-                      ),
-                      firebase
-                        .firestore()
-                        .collection("stock")
-                        .doc("count")
-                        .update({
-                          amount: firebase.firestore.FieldValue.increment(-1),
-                        })
-                    )}
-                  />
-                </>
+              .map(({ name, price, stock_amount, id }, index) => (
+                <Items
+                  key={index}
+                  item_barcode={id}
+                  item_name={name.toString()}
+                  item_price={price}
+                  stock_amount={stock_amount}
+                  removeItem={(item_name) => (
+                    setItem((prev) =>
+                      prev.filter(({ name }) => name !== item_name)
+                    ),
+                    firebase
+                      .firestore()
+                      .collection("stock")
+                      .doc("count")
+                      .update({
+                        amount: firebase.firestore.FieldValue.increment(-1),
+                      })
+                  )}
+                />
               ))}
             {isLoading && <h2>กำลังโหลด</h2>}
             <div style={{ height: 50, content: "" }}></div>
