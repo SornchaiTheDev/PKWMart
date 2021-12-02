@@ -8,7 +8,6 @@ import Barcode from "./pages/merchant/Barcode";
 import NotFound from "./pages/Notfound";
 import Admin from "./pages/admin/Admin";
 import Dashboard from "./pages/admin/Dashboard";
-import Front from "./pages/admin/Front";
 import Stock from "./pages/admin/Stock";
 import CustomerView from "./pages/CustomerView";
 
@@ -28,7 +27,6 @@ function App() {
           <Route path="/merchant/barcode" exact component={Barcode} />
           <Route path="/404" exact component={NotFound} />
           <Route path="/admin/dashboard" exact component={Dashboard} />
-          <Route path="/admin/front" exact component={Front} />
           <Route path="/admin/stock" exact component={Stock} />
         </Switch>
       </Router>

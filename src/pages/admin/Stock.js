@@ -6,16 +6,16 @@ import firebase from "../../firebase";
 import Popup from "../../components/Popup";
 import Items from "../../components/Stock_Item";
 import StockMenu from "../../components/StockMenu";
+import AddItem from "../../components/AddItem";
+import EditPopup from "../../components/EditPopup";
 import "../../App.css";
 
 function Stock() {
   const history = useHistory();
   const [user, setUser] = useState([]);
-  const [front, setFront] = useState(true);
   const [addItem, setAddItem] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [last, setLast] = useState(null);
-  const [frontItem, setFrontItem] = useState(false);
   const [stockItem, setStockItem] = useState(false);
   const [editItem, setEditItem] = useState(false);
   const [count, setCount] = useState(0);
@@ -59,7 +59,7 @@ function Stock() {
       .doc("count")
       .get()
       .then((doc) => setCount(doc.data().amount));
-  }, [success]);
+  }, []);
 
   const infiniteLoad = (e) => {
     const { window } = e.currentTarget;
@@ -106,15 +106,14 @@ function Stock() {
   if (user === []) return <div></div>;
   return (
     <>
-      <Popup add={frontItem} close={() => setFrontItem(false)} />
       <Popup add={stockItem} close={() => setStockItem(false)} stock />
-      {/* <Popup add={addItem} close={() => setAddItem(true)} stock /> */}
+      {editItem && <EditPopup close={() => setEditItem(false)} />}
 
       <div
         style={{
           display: "flex",
           justifyContent: "center",
-          background: front ? "#0099FF" : "white",
+          background: "#0099FF",
           minHeight: "100vh",
         }}
       >
@@ -124,57 +123,48 @@ function Stock() {
             justifyContent: "flex-start",
             alignItems: "flex-start",
             padding: "50px 20px",
-            background: front ? "white" : "#0099FF",
+            background: "white",
             width: "90%",
             flexWrap: "wrap",
           }}
         >
-          <div style={{ width: "100%" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-start",
+              alignItems: "center",
+              gap: 20,
+              cursor: "pointer",
+            }}
+            onClick={() => history.replace("/admin/dashboard")}
+          >
+            <FontAwesomeIcon icon={faArrowLeft} size="1x" color="black" />
+            <h4 style={{ color: "black" }}>กลับหน้าหลัก</h4>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              borderRadius: 50,
+              justifyContent: "center",
+              alignItems: "center",
+              width: "100%",
+              flexWrap: "wrap",
+              gap: 100,
+            }}
+          >
             <div
               style={{
-                display: "flex",
-                justifyContent: "flex-start",
-                alignItems: "center",
-                gap: 20,
-                cursor: "pointer",
-              }}
-              onClick={() => history.replace("/admin/dashboard")}
-            >
-              <FontAwesomeIcon
-                icon={faArrowLeft}
-                size="1x"
-                color={front ? "black" : "white"}
-              />
-              <h4 style={{ color: front ? "black" : "white" }}>กลับหน้าหลัก</h4>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                borderRadius: 50,
-                justifyContent: "center",
-                alignItems: "center",
-                width: "100%",
-                flexWrap: "wrap",
-                gap: 100,
+                marginTop: 20,
+                borderBottom: "6px solid #0099FF",
               }}
             >
-              <div
-                style={{
-                  marginTop: 20,
-                  borderBottom: front ? "6px solid #0099FF" : "6px solid white",
-                }}
-              >
-                <h2 style={{ color: front ? "black" : "white" }}>
-                  สินค้าทั้งหมด
-                </h2>
-                <h1 style={{ fontSize: 64, color: front ? "black" : "white" }}>
-                  {count.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}{" "}
-                  ชิ้น
-                </h1>
-              </div>
+              <h2 style={{ color: "black" }}>สินค้าทั้งหมด</h2>
+              <h1 style={{ fontSize: 64, color: "black" }}>
+                {count.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}{" "}
+                ชิ้น
+              </h1>
             </div>
 
-            <StockMenu stock />
             <div
               style={{
                 display: "flex",
@@ -182,34 +172,17 @@ function Stock() {
                 width: "100%",
               }}
             >
-              <div
-                style={{
-                  padding: 20,
-                  borderRadius: 20,
-                  display: front ? "flex" : "none",
-                  flexDirection: "row",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  gap: 10,
-                  color: "black",
-                  cursor: "pointer",
-                }}
-                onClick={() => setFrontItem(true)}
-              >
-                <FontAwesomeIcon icon={faPlus} />
-                <h4>เติมสินค้าหน้าร้าน</h4>
-              </div>
               <div
                 style={{
                   width: "100px",
                   padding: 20,
                   borderRadius: 20,
-                  display: !front ? "flex" : "none",
+                  display: "flex",
                   flexDirection: "row",
                   justifyContent: "center",
                   alignItems: "center",
                   gap: 10,
-                  color: "white",
+                  color: "black",
                   cursor: "pointer",
                 }}
                 onClick={() => setAddItem(true)}
@@ -221,12 +194,12 @@ function Stock() {
                 style={{
                   padding: 20,
                   borderRadius: 20,
-                  display: !front ? "flex" : "none",
+                  display: "flex",
                   flexDirection: "row",
                   justifyContent: "center",
                   alignItems: "center",
                   gap: 10,
-                  color: "#58EF2E",
+                  color: "black",
                   cursor: "pointer",
                 }}
                 onClick={() => setStockItem(true)}
@@ -238,7 +211,7 @@ function Stock() {
                 style={{
                   padding: 20,
                   borderRadius: 20,
-                  display: !front ? "flex" : "none",
+                  display: "flex",
                   flexDirection: "row",
                   justifyContent: "center",
                   alignItems: "center",
@@ -252,12 +225,10 @@ function Stock() {
                 <h4>แก้ไขสินค้า</h4>
               </div>
             </div>
-            {addItem && !front && (
+            {addItem && (
               <div style={{ display: "flex", justifyContent: "center" }}>
-                <Items
-                  from="stock"
+                <AddItem
                   removeItem={() => setAddItem(false)}
-                  addItem
                   success={() => setSuccess((prev) => prev + 1)}
                 />
               </div>
@@ -277,37 +248,34 @@ function Stock() {
           >
             {item.length === 0 && <h3>ไม่มีสินค้า</h3>}
             {item
-              .sort((a, b) =>
-                front
-                  ? b.front_item - a.front_item
-                  : b.stock_item - a.stock_item
-              )
-              .map(({ name, price, front_amount, stock_amount, id }) => (
-                <Items
-                  key={id}
-                  doc={id}
-                  item_barcode={id}
-                  item_name={name.toString()}
-                  item_price={price}
-                  front_amount={front_amount}
-                  stock_amount={stock_amount}
-                  front={front}
-                  removeItem={(item_name) => (
-                    setItem((prev) =>
-                      prev.filter(({ name }) => name !== item_name)
-                    ),
-                    firebase
-                      .firestore()
-                      .collection("stock")
-                      .doc("count")
-                      .update({
-                        amount: firebase.firestore.FieldValue.increment(-1),
-                      }),
-                    setSuccess((prev) => prev - 1)
-                  )}
-                />
+              .sort((a, b) => b.stock_item - a.stock_item)
+              .map(({ name, price, stock_amount, id }) => (
+                <>
+                  <Items
+                    key={id}
+                    doc={id}
+                    item_barcode={id}
+                    item_name={name.toString()}
+                    item_price={price}
+                    stock_amount={stock_amount}
+                    removeItem={(item_name) => (
+                      setItem((prev) =>
+                        prev.filter(({ name }) => name !== item_name)
+                      ),
+                      firebase
+                        .firestore()
+                        .collection("stock")
+                        .doc("count")
+                        .update({
+                          amount: firebase.firestore.FieldValue.increment(-1),
+                        }),
+                      setSuccess((prev) => prev - 1)
+                    )}
+                  />
+                </>
               ))}
             {isLoading && <h2>กำลังโหลด</h2>}
+            <div style={{ height: 50, content: "" }}></div>
           </div>
         </div>
       </div>

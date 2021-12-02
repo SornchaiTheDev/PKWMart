@@ -9,9 +9,7 @@ function Scan({ add, close, setItem, item, err, setExist }) {
   useEffect(() => {
     setShow(add);
   }, [add]);
-  useEffect(() => {
-    setItem("8859062500711");
-  }, []);
+
   return (
     <>
       <BarcodeScanner onScan={(data) => setItem(data)} />
