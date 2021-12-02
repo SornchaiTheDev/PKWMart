@@ -5,6 +5,7 @@ import { faArrowLeft, faPlus } from "@fortawesome/free-solid-svg-icons";
 import firebase from "../../firebase";
 import Popup from "../../components/Popup";
 import Items from "../../components/Stock_Item";
+import StockMenu from "../../components/StockMenu";
 import "../../App.css";
 
 function Stock() {
@@ -16,6 +17,7 @@ function Stock() {
   const [last, setLast] = useState(null);
   const [frontItem, setFrontItem] = useState(false);
   const [stockItem, setStockItem] = useState(false);
+  const [editItem, setEditItem] = useState(false);
   const [count, setCount] = useState(0);
   const [success, setSuccess] = useState(0);
 
@@ -106,6 +108,7 @@ function Stock() {
     <>
       <Popup add={frontItem} close={() => setFrontItem(false)} />
       <Popup add={stockItem} close={() => setStockItem(false)} stock />
+      {/* <Popup add={addItem} close={() => setAddItem(true)} stock /> */}
 
       <div
         style={{
@@ -171,53 +174,7 @@ function Stock() {
               </div>
             </div>
 
-            <div
-              style={{
-                marginTop: 50,
-                height: 100,
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: 100,
-              }}
-            >
-              <div
-                onClick={() => setFront(!front)}
-                style={{
-                  cursor: "pointer",
-                  borderBottom: front
-                    ? "4px solid #0099FF"
-                    : "0px solid #0099FF",
-                  transition: "border-bottom 100ms",
-                }}
-              >
-                <h3
-                  style={{
-                    fontSize: "1.25em",
-                    color: front ? "black" : "white",
-                  }}
-                >
-                  สินค้าหน้าร้าน
-                </h3>
-              </div>
-              <div
-                onClick={() => setFront(!front)}
-                style={{
-                  cursor: "pointer",
-                  borderBottom: front ? "0px solid #0099FF" : "4px solid white",
-                  transition: "border-bottom 100ms",
-                }}
-              >
-                <h3
-                  style={{
-                    fontSize: "1.25em",
-                    color: front ? "black" : "white",
-                  }}
-                >
-                  สินค้าในสต็อก
-                </h3>
-              </div>
-            </div>
+            <StockMenu stock />
             <div
               style={{
                 display: "flex",
@@ -276,6 +233,23 @@ function Stock() {
               >
                 <FontAwesomeIcon icon={faPlus} />
                 <h4>เติมสินค้าในสต็อก</h4>
+              </div>
+              <div
+                style={{
+                  padding: 20,
+                  borderRadius: 20,
+                  display: !front ? "flex" : "none",
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: 10,
+                  color: "gold",
+                  cursor: "pointer",
+                }}
+                onClick={() => setEditItem(true)}
+              >
+                <FontAwesomeIcon icon={faPlus} />
+                <h4>แก้ไขสินค้า</h4>
               </div>
             </div>
             {addItem && !front && (

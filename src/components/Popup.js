@@ -3,12 +3,15 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBarcode } from "@fortawesome/free-solid-svg-icons";
 import BarcodeScanner from "react-barcode-reader";
 import firebase from "../firebase";
-function Scan({ add, close, setItem, item, err , setExist }) {
+function Scan({ add, close, setItem, item, err, setExist }) {
   const [show, setShow] = useState(true);
 
   useEffect(() => {
     setShow(add);
   }, [add]);
+  useEffect(() => {
+    setItem("8859062500711");
+  }, []);
   return (
     <>
       <BarcodeScanner onScan={(data) => setItem(data)} />
@@ -48,7 +51,7 @@ function Scan({ add, close, setItem, item, err , setExist }) {
               padding: "10px 40px",
               color: "white",
             }}
-            onClick={() => (close() , setExist(null))}
+            onClick={() => (close(), setExist(null))}
           >
             ยกเลิก
           </button>
@@ -136,7 +139,8 @@ const AddAmount = ({ item, close, add, from }) => {
             borderBottom: "4px solid #0099FF",
             width: "20%",
             outline: "none",
-            border: "none",
+            border: "2px solid black",
+            borderRadius: "16px",
             background: "none",
             fontSize: 28,
           }}
@@ -176,18 +180,17 @@ const Popup = ({ add, close, stock }) => {
         .get();
       if (!items.exists) {
         setExist(false);
-        setItem("")
+        setItem("");
       } else {
         setExist(true);
-        
       }
     };
     item !== "" && item_check();
-  }, [item , exist]);
+  }, [item, exist]);
 
   useEffect(() => {
-    console.log(exist)
-  },[exist])
+    console.log(exist);
+  }, [exist]);
   return (
     <>
       {item && exist ? (
