@@ -19,7 +19,6 @@ function Stock() {
   const [stockItem, setStockItem] = useState(false);
   const [editItem, setEditItem] = useState(false);
   const [count, setCount] = useState(0);
-  const [success, setSuccess] = useState(0);
 
   //All Items
   const [item, setItem] = useState([]);
@@ -99,7 +98,6 @@ function Stock() {
   };
   useEffect(() => {
     window.addEventListener("scroll", infiniteLoad);
-    console.log(item);
     return () => window.removeEventListener("scroll", infiniteLoad);
   }, [last]);
 
@@ -227,10 +225,7 @@ function Stock() {
             </div>
             {addItem && (
               <div style={{ display: "flex", justifyContent: "center" }}>
-                <AddItem
-                  removeItem={() => setAddItem(false)}
-                  success={() => setSuccess((prev) => prev + 1)}
-                />
+                <AddItem removeItem={() => setAddItem(false)} />
               </div>
             )}
           </div>
@@ -268,8 +263,7 @@ function Stock() {
                         .doc("count")
                         .update({
                           amount: firebase.firestore.FieldValue.increment(-1),
-                        }),
-                      setSuccess((prev) => prev - 1)
+                        })
                     )}
                   />
                 </>

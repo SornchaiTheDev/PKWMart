@@ -32,15 +32,10 @@ function AddItem({ removeItem }) {
         .collection("stock")
         .doc("count")
         .update({ amount: firebase.firestore.FieldValue.increment(1) });
-      setMsg("เพิ่มสินค้าสำเร็จ");
       window.location.reload(false);
     } else {
-      setMsg("เพิ่มสินค้าไม่สำเร็จ");
+      alert("มีสินค้านี้อยู่แล้ว");
     }
-
-    setTimeout(() => {
-      setMsg("");
-    }, 1000);
   };
 
   return (

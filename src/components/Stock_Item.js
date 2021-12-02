@@ -6,7 +6,14 @@ import firebase from "../firebase";
 
 import Alert from "../components/Alert";
 
-const Items = ({ item_barcode, item_name, item_price, stock_amount, doc }) => {
+const Items = ({
+  item_barcode,
+  item_name,
+  item_price,
+  stock_amount,
+  doc,
+  removeItem,
+}) => {
   const [item, setItem] = useState({
     barcode: item_barcode,
     name: item_name,
@@ -41,7 +48,7 @@ const Items = ({ item_barcode, item_name, item_price, stock_amount, doc }) => {
   };
 
   const remove = () => {
-    // removeItem(name);
+    removeItem(item.name);
     firebase.firestore().collection("stock").doc(item.barcode).delete();
   };
   return (
