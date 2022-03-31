@@ -5,7 +5,7 @@ function End() {
   const { GlobalItem } = useContext(Context);
   const { profit, total } = GlobalItem;
   const today = new Date();
-  const last_open = new Date(GlobalItem.last_open.seconds * 1000);
+  const last_open = new Date(GlobalItem.last_open);
   const history = useHistory();
   const isToday =
     today.getDate() +
@@ -14,9 +14,11 @@ function End() {
     0;
 
   useEffect(() => {
+    const url = new URL(window.location.href);
+    const counter = url.searchParams.get("counter");
     window.print();
     setTimeout(() => {
-      history.replace(`/merchant/checkout?counter=${GlobalItem.counter}`);
+      history.replace(`/merchant/checkout?counter=${counter}`);
     }, 1000);
   }, []);
 
@@ -64,11 +66,11 @@ function End() {
       )}
       <h3>
         เคาท์เตอร์ที่{" "}
-        {GlobalItem.counter === "counter01@pkw.ac.th"
+        {GlobalItem.counter === "1"
           ? 1
-          : GlobalItem.counter === "counter02@pkw.ac.th"
+          : GlobalItem.counter === "2"
           ? 2
-          : "admin"}
+          : "error"}
       </h3>
       <div
         style={{

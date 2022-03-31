@@ -18,7 +18,7 @@ function Admin() {
   useEffect(() => {
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
-        history.replace("/admin/dashboard");
+        history.replace("/");
       }
     });
   }, []);
@@ -32,10 +32,7 @@ function Admin() {
         .auth()
         .signInWithEmailAndPassword(email, password)
         .then(
-          async () => (
-            await cookies.set("admin", "true"),
-            history.replace("/admin/dashboard")
-          )
+          async () => (await cookies.set("admin", "true"), history.replace("/"))
         )
         .catch(
           (err) => (

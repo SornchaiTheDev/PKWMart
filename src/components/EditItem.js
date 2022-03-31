@@ -1,20 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-import firebase from "../firebase";
+import axios from "axios";
 
-function EditItem({ removeItem, barcode, name, price, amount }) {
-  const [item, setItem] = useState({
-    barcode,
-    name,
-    price,
-    amount,
-  });
+function EditItem({ properties }) {
+  const [item, setItem] = useState(properties);
+
+  useEffect(() => {
+    setItem(properties);
+  }, [properties]);
+
   const editItem = async () => {
-    await firebase
-      .firestore()
-      .collection("stock")
-      .doc(item.barcode)
-      .update(item);
+    axios.post(`http://${process.env.REACT_APP_HOSTNAME}/stock/update`, item);
     window.location.reload(false);
   };
 
@@ -68,7 +64,7 @@ function EditItem({ removeItem, barcode, name, price, amount }) {
         }
       />
 
-      <label>จำนวนในสต็อก (ชิ้น)</label>
+      {/* <label>จำนวนในสต็อก (ชิ้น)</label>
 
       <input
         type="number"
@@ -83,12 +79,12 @@ function EditItem({ removeItem, barcode, name, price, amount }) {
         onChange={(e) =>
           setItem((prev) => ({ ...prev, amount: e.target.value }))
         }
-      />
+      /> */}
 
       <button
         onClick={editItem}
         style={{
-          width: "100%",
+          width: "70%",
           background: "orange",
           color: "white",
           outline: "none",

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "../App.css";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
-import firebase from "../firebase";
+import axios from "axios";
 
 import Alert from "../components/Alert";
 
@@ -32,22 +32,20 @@ const Items = ({
       : (edit = false);
 
     setIsEdit(edit);
-  }, [item.name, item.barcode, item.price, item.stock_amount]);
+  }, [item]);
 
   const editItem = async () => {
-    await firebase
-      .firestore()
-      .collection("stock")
-      .doc(item.barcode)
-      .update(item)
-      .then(() => setIsEdit(false))
-      .catch((err) => console.log(err));
+    axios.post(`http://${process.env.REACT_APP_HOSTNAME}/stock/update`, item);
     window.location.reload(false);
   };
 
   const remove = () => {
-    removeItem(item.name);
-    firebase.firestore().collection("stock").doc(item.barcode).delete();
+    removeItem(item.barcode);
+    axios
+      .post(`http://${process.env.REACT_APP_HOSTNAME}/stock/delete`, {
+        barcode: item_barcode,
+      })
+      .then((res) => console.log(res));
   };
   return (
     <>
@@ -105,22 +103,6 @@ const Items = ({
             }
           />
           <label>บาท</label>
-
-          <label>จำนวนในสต็อก :</label>
-
-          <input
-            type="number"
-            value={item.stock_amount}
-            className="items-input"
-            style={{ width: "5vw" }}
-            onChange={(e) =>
-              setItem((prev) => ({
-                ...prev,
-                stock_amount: parseInt(e.target.value),
-              }))
-            }
-          />
-          <label>ชิ้น</label>
 
           <div
             style={{

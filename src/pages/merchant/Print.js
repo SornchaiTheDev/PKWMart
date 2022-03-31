@@ -8,10 +8,11 @@ function Print() {
 
   useEffect(() => {
     window.print();
+    const url = new URL(window.location.href);
+    const counter = url.searchParams.get("counter");
     setTimeout(() => {
-      history.replace(`/merchant/checkout?counter=${GlobalItem.counter}`);
+      history.replace(`/merchant/checkout?counter=${counter}`);
     }, 1000);
-    console.log(GlobalItem.counter);
   }, []);
 
   const months = [
@@ -94,9 +95,9 @@ function Print() {
         >
           <h4>
             บิลเครื่องที่{" "}
-            {GlobalItem.counter === "counter01@pkw.ac.th"
+            {GlobalItem.counter === "1"
               ? 1
-              : GlobalItem.counter === "counter02@pkw.ac.th"
+              : GlobalItem.counter === "2"
               ? 2
               : "admin"}
           </h4>

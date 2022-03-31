@@ -1,41 +1,29 @@
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
-import firebase from "../firebase";
+import axios from "axios";
 
 function AddItem({ removeItem }) {
   const [item, setItem] = useState({
     barcode: "",
     name: "",
     price: "",
-    stock_amount: "",
   });
   const addToDb = async () => {
-    const same_check = await firebase
-      .firestore()
-      .collection("stock")
-      .doc(item.barcode)
-      .get();
+    let isInStock = await axios.post(
+      `http://${process.env.REACT_APP_HOSTNAME}/stock/check`,
+      {
+        name: item.name,
+      }
+    );
 
-    if (!same_check.exists) {
-      await firebase
-        .firestore()
-        .collection("stock")
-        .doc(item.barcode)
-        .set({
-          ...item,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        });
+    if (isInStock.data) return alert("มีสินค้านี้อยู่แล้ว");
 
-      await firebase
-        .firestore()
-        .collection("stock")
-        .doc("count")
-        .update({ amount: firebase.firestore.FieldValue.increment(1) });
-      window.location.reload(false);
-    } else {
-      alert("มีสินค้านี้อยู่แล้ว");
-    }
+    await axios.post(
+      `http://${process.env.REACT_APP_HOSTNAME}/stock/add`,
+      item
+    );
+    window.location.reload(false);
   };
 
   return (
@@ -98,7 +86,7 @@ function AddItem({ removeItem }) {
         />
         <label>บาท</label>
 
-        <label>จำนวนในสต็อก :</label>
+        {/* <label>จำนวนในสต็อก :</label>
 
         <input
           type="number"
@@ -109,7 +97,7 @@ function AddItem({ removeItem }) {
             setItem((prev) => ({ ...prev, amount: e.target.value }))
           }
         />
-        <label>ชิ้น</label>
+        <label>ชิ้น</label> */}
 
         <div
           style={{

@@ -138,7 +138,7 @@
 }
 
 .BigText {
-  font-size: 100px;
+  font-size: 4rem;
 }
 
 @media (max-width: 1600px) {

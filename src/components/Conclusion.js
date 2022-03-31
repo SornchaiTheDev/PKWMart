@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import firebase from "../firebase";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import axios from "axios";
 
 const Conclusion = ({ counter, show, close, setGlobalItem, history }) => {
   const [notes, setNotes] = useState({
@@ -26,30 +27,27 @@ const Conclusion = ({ counter, show, close, setGlobalItem, history }) => {
       notes;
     setMoney(
       thousand * 1000 +
-        fivehund * 500 +
-        hundred * 100 +
-        fifty * 50 +
-        twenty * 20 +
-        ten * 10 +
-        five * 5 +
-        two * 2 +
-        one * 1
+      fivehund * 500 +
+      hundred * 100 +
+      fifty * 50 +
+      twenty * 20 +
+      ten * 10 +
+      five * 5 +
+      two * 2 +
+      one * 1
     );
   }, [notes]);
 
   const Calculate = () => {
-    firebase
-      .firestore()
-      .collection("counter")
-      .doc(counter)
-      .get()
-      .then((doc) => {
-        const total = doc.data().salary;
-        setLastOpen(doc.data().last_open);
-        setProfit(money - 5000 - total);
-        setTotal(total);
-        setOrder(2);
-      });
+    axios.get(`http://${process.env.REACT_APP_HOSTNAME}/counter/${counter}`).then((res) => {
+      const { salary, last_open } = res.data;
+
+      const total = salary;
+      setLastOpen(last_open);
+      setProfit(money - 5000 - total);
+      setTotal(total);
+      setOrder(2);
+    });
   };
 
   const Print = async () => {
@@ -61,13 +59,11 @@ const Conclusion = ({ counter, show, close, setGlobalItem, history }) => {
       counter: counter,
       last_open: lastOpen,
     });
-    await firebase.firestore().collection("counter").doc(counter).update({
-      salary: 0,
-      last_open: firebase.firestore.FieldValue.serverTimestamp(),
-    });
-    history.replace("/merchant/end");
+    await axios.get(`http://${process.env.REACT_APP_HOSTNAME}/counter/${counter}/clear`);
+
+    history.replace(`/merchant/end?counter=${counter}`);
   };
-  
+
   if (order === 1)
     return (
       <div

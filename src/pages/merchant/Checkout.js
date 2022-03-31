@@ -2,22 +2,17 @@ import React, { useState, useEffect, useContext } from "react";
 import Item from "../../components/Item";
 import { useHistory } from "react-router-dom";
 import { Context } from "../../App";
-import firebase from "../../firebase";
 import Cookies from "universal-cookie";
 import Alert from "../../components/Alert";
 import Conclusion from "../../components/Conclusion";
 import BarcodeScanner from "react-barcode-reader";
-import Numpad from "../../components/Numpad";
 import BillCancel from "../../components/BillCancel";
 import Custom from "../../components/Custom";
-import QRScanStatus from "../../components/QRScanStatus";
+import axios from "axios";
 import "../../App.css";
 
 function Checkout() {
   const cookies = new Cookies();
-
-  // Validate User
-  const [user, setUser] = useState([]);
 
   // Checkout Essentail
   const [multiply, setMultiply] = useState(1);
@@ -31,14 +26,10 @@ function Checkout() {
 
   // PopUp Status
   const [checkout, setCheckout] = useState(false);
-  const [qrPay, setQrPay] = useState(false);
   const [custom, setCustom] = useState(false);
   const [closeShop, setCloseShop] = useState(false);
   const [billVoid, setBillVoid] = useState(false);
 
-  // QR Pay
-  const [countdown, setCountdown] = useState(60);
-  const [qrBill, setQRBill] = useState("");
   const history = useHistory();
 
   const { setGlobalItem } = useContext(Context);
@@ -60,30 +51,19 @@ function Checkout() {
 
     if (payIn >= total) {
       setCheckout(true);
-      await firebase
-        .firestore()
-        .collection("history")
-        .doc(billNumber)
-        .set({
-          payIn: payIn,
-          items: item,
-          time: new Date(),
-          status: "normal",
-          price: total,
-          counter: counter,
-        })
-        .catch((err) => alert(`Add Failed! ${err.code}`));
+
       setChange(payIn - total);
 
-      counter !== null &&
-        (await firebase
-          .firestore()
-          .collection("counter")
-          .doc(counter)
-          .update({
-            change: payIn - total,
-            salary: firebase.firestore.FieldValue.increment(total),
-          }));
+      axios.post(`http://${process.env.REACT_APP_HOSTNAME}/counter/update`, {
+        counter: Number(counter),
+        total,
+        billNumber,
+        payIn: payIn,
+        items: item,
+        time: new Date(),
+        price: total,
+        status: "pay",
+      });
 
       setGlobalItem({
         item: item,
@@ -95,118 +75,36 @@ function Checkout() {
       });
       await cookies.set("change", payIn - total);
 
-      history.replace("/merchant/print");
+      history.push(`/merchant/print?counter=${counter}`);
     }
   };
 
   const BillDelete = async () => {
     if (bill !== "") {
-      await firebase
-        .firestore()
-        .collection("history")
-        .doc(bill)
-        .update({ status: "cancel" }, { merge: true })
-        .then(() => console.log("success"));
+      const res = await axios.get(
+        `http://${process.env.REACT_APP_HOSTNAME}/bill/${bill}`
+      );
 
-      await firebase
-        .firestore()
-        .collection("history")
-        .doc(bill)
-        .get()
-        .then(async (doc) => {
-          const price = doc.data().price;
+      const price = res.data.price;
 
-          await firebase
-            .firestore()
-            .collection("counter")
-            .doc(voidCounter)
-            .update(
-              { salary: firebase.firestore.FieldValue.increment(-price) },
-              { merge: true }
-            )
-            .then(() => console.log("remove"));
-        });
+      await axios.post(
+        `http://${process.env.REACT_APP_HOSTNAME}/counter/update`,
+        {
+          counter: voidCounter,
+          total: -price,
+          status: "void",
+        }
+      );
+
+      await axios.post(`http://${process.env.REACT_APP_HOSTNAME}/bill/cancel`, {
+        billNumber: bill,
+      });
     }
+
     setItem([]);
     setMoney("");
     setBill("");
   };
-
-  //QR Payment
-  useEffect(() => {
-    const QRGen = async () => {
-      const qrBillGen = `${new Date().getDate()}${new Date().getMonth()}${new Date().getHours()}${new Date().getMinutes()}${new Date().getSeconds()}`;
-      setQRBill(qrBillGen);
-      if (qrPay) {
-        const qrCreate = await fetch(
-          `https://asia-south1-daipay.cloudfunctions.net/QRGen?qr=${qrBillGen}&token=testtoken`
-        );
-        const data = await qrCreate.json();
-        if (data.status === "success") {
-          await firebase
-            .firestore()
-            .collection("counter")
-            .doc(counter)
-            .set({ qrBill: qrBillGen }, { merge: true });
-        }
-      }
-    };
-    qrPay && QRGen();
-  }, [qrPay]);
-
-  useEffect(() => {
-    const getStatus = async () => {
-      const response = await fetch(
-        `https://asia-south1-daipay.cloudfunctions.net/QRCheck?qr=${qrBill}&token=testtoken`
-      );
-
-      const data = await response.json();
-
-      const QRPayFunc = async () => {
-        setCheckout(true);
-        await firebase
-          .firestore()
-          .collection("e-history")
-          .doc(qrBill)
-          .set({
-            items: item,
-            time: new Date(),
-            status: "normal",
-            price: total,
-            counter: counter,
-          })
-          .then(() => {})
-          .catch((err) => alert(`Add Failed! ${err.code}`));
-
-        setGlobalItem({
-          type: "qr",
-          item: item,
-          billNumber: qrBill,
-          price: total,
-          counter: counter,
-        });
-
-        history.replace("/merchant/print");
-      };
-
-      if (data.status === "success") {
-        QRPayFunc();
-        await firebase
-          .firestore()
-          .collection("counter")
-          .doc(counter)
-          .set({ qrBill: "" }, { merge: true });
-      }
-    };
-    const timeout = setTimeout(() => {
-      qrBill !== "" && getStatus();
-      setCountdown((prev) => prev - 1);
-    }, 1000);
-    return () => clearTimeout(timeout);
-  }, [countdown, qrBill]);
-
-  //QR Payment --- End
-
   useEffect(() => {
     const keyPress = (e) => {
       (e.code === "NumpadDivide" || e.code === "Slash" || e.code === "Space") &&
@@ -242,66 +140,35 @@ function Checkout() {
     scroll.scrollTop = scroll.scrollHeight;
   }, [item]);
 
-  useEffect(async () => {
-    firebase.auth().onAuthStateChanged((user) => {
-      setUser(user);
-      if (!user) {
-        history.replace("/");
-      }
-    });
-  }, []);
-
   // Update Total Price
   useEffect(() => {
     const total = item.reduce((total, { price }) => total + price, 0);
     setTotal(total);
   }, [item]);
 
-  //Update Customer View Items
-  useEffect(() => {
-    counter !== null &&
-      firebase
-        .firestore()
-        .collection("counter")
-        .doc(counter)
-        .update({ now: item }, { merge: true });
-  }, [item, counter]);
-
-  // Update Customer View Change
-  useEffect(() => {
-    counter !== null &&
-      item.length === 0 &&
-      firebase
-        .firestore()
-        .collection("counter")
-        .doc(counter)
-        .update({ change: 0 }, { merge: true });
-  }, [change]);
-
   // Scan Barcode To Add Item
   const Scann = async (data) => {
     let amount = 1;
     if (multiply !== null) amount = multiply;
     setMultiply(1);
-    const item_scan = await firebase
-      .firestore()
-      .collection("stock")
-      .doc(data)
-      .get();
-    if (item_scan.exists) {
-      const same = item.find(({ name }) => name === item_scan.data().name);
+    console.log("scann");
+    const item_scan = await axios.get(
+      `http://${process.env.REACT_APP_HOSTNAME}/stock/${data}`
+    );
+
+    if (item_scan) {
+      const same = item.find(({ name }) => name === item_scan.data.name);
       if (same) {
         const new_list = item.filter(
-          ({ name }) => name !== item_scan.data().name
+          ({ name }) => name !== item_scan.data.name
         );
         setItem(() => [
           ...new_list,
           {
-            ...item_scan.data(),
+            ...item_scan.data,
             amount: parseInt(same.amount) + parseInt(amount),
             price:
-              item_scan.data().price *
-              (parseInt(same.amount) + parseInt(amount)),
+              item_scan.data.price * (parseInt(same.amount) + parseInt(amount)),
             barId: data,
           },
         ]);
@@ -309,9 +176,9 @@ function Checkout() {
         setItem((prev) => [
           ...prev,
           {
-            ...item_scan.data(),
+            ...item_scan.data,
             amount: amount,
-            price: item_scan.data().price * amount,
+            price: item_scan.data.price * amount,
           },
         ]);
       }
@@ -319,8 +186,6 @@ function Checkout() {
       alert("ไม่พบสินค้าชิ้นนี้");
     }
   };
-
-  if (user === []) return <div id="items"></div>;
 
   return (
     <>
@@ -330,6 +195,7 @@ function Checkout() {
         bill={(data) => (
           setItem(data.item), setBill(data.bill), setVoidCounter(data.counter)
         )}
+        cancel={BillDelete}
       />
       {custom && (
         <Custom
@@ -351,8 +217,7 @@ function Checkout() {
         setGlobalItem={(data) => setGlobalItem(data)}
         history={history}
       />
-      <QRScanStatus open={qrPay} />
-      <BarcodeScanner onScan={!billVoid && Scann} />
+      <BarcodeScanner onScan={(e) => !billVoid && Scann(e)} />
       <Alert
         show={change > 0}
         onClick={() => {
@@ -361,22 +226,24 @@ function Checkout() {
         }}
         change={change}
       />
+      <div
+        style={{ position: "absolute", top: 10, left: 60, cursor: "pointer" }}
+        onClick={() => history.replace(`/?counter=${counter}`)}
+      >
+        <h3>กลับหน้าหลัก</h3>
+      </div>
       <div className="container">
         <div className="checkout-flex">
           <div className="left-panel">
             <h1
               style={{
                 marginTop: 50,
-                color:
-                  counter === "counter01@pkw.ac.th" ||
-                  counter === "counter02@pkw.ac.th"
-                    ? "black"
-                    : "red",
+                color: counter === "1" || counter === "2" ? "black" : "red",
               }}
             >
-              {counter === "counter01@pkw.ac.th"
+              {counter === "1"
                 ? "เครื่องที่  1"
-                : counter === "counter02@pkw.ac.th"
+                : counter === "2"
                 ? "เครื่องที่  2"
                 : "เปิดโปรแกรมใหม่ !"}
             </h1>
@@ -487,21 +354,6 @@ function Checkout() {
               >
                 ขายเอง
               </button>
-              <button
-                style={{
-                  marginTop: 20,
-                  border: "none",
-                  background: "#0099FF",
-                  color: "white",
-                  padding: "20px 40px",
-                  borderRadius: 20,
-                  cursor: "pointer",
-                  outline: "none",
-                }}
-                onClick={() => setQrPay(true)}
-              >
-                แสกนจ่าย
-              </button>
             </div>
           </div>
 
@@ -543,15 +395,12 @@ function Checkout() {
                       fontSize: 18,
                       padding: "10px 16px",
                     }}
-                    type="text"
-                    value={money.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}
+                    type="number"
                     id="money"
                     onChange={(e) => setMoney(e.target.value.replace(/,/g, ""))}
                   />
                 </form>
               </div>
-
-              <Numpad onPress={(number) => setMoney(number)} money={money} />
             </div>
 
             <div

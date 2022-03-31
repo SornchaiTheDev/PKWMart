@@ -3,23 +3,16 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBarcode } from "@fortawesome/free-solid-svg-icons";
 import BarcodeScanner from "react-barcode-reader";
 import EditItem from "./EditItem";
-import firebase from "../firebase";
+import axios from "axios";
 function EditPopup({ setEdit, close, show }) {
   const [item, setItem] = useState({
     barcode: "",
     name: "",
     price: "",
-    stock_amount: "",
   });
-  const getItem = async (barcode) => {
-    const doc = await firebase
-      .firestore()
-      .collection("stock")
-      .doc(barcode)
-      .get();
-
-    const { name, price, stock_amount } = doc.data();
-    setItem((prev) => ({ ...prev, barcode, name, price, stock_amount }));
+  const getItem = async (in_barcode) => {
+    const res = await axios.get(`http://${process.env.REACT_APP_HOSTNAME}/stock/${in_barcode}`);
+    setItem((prev) => ({ ...prev, ...res.data }));
   };
 
   return (
@@ -67,12 +60,7 @@ function EditPopup({ setEdit, close, show }) {
               </button>
             </>
           ) : (
-            <EditItem
-              name={item.name}
-              barcode={item.barcode}
-              price={item.price}
-              amount={item.stock_amount}
-            />
+            <EditItem properties={item} />
           )}
         </div>
       </div>

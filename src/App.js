@@ -4,12 +4,11 @@ import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import Checkout from "./pages/merchant/Checkout";
 import Print from "./pages/merchant/Print";
 import End from "./pages/merchant/End";
-import Barcode from "./pages/merchant/Barcode";
 import NotFound from "./pages/Notfound";
 import Admin from "./pages/admin/Admin";
 import Dashboard from "./pages/admin/Dashboard";
 import Stock from "./pages/admin/Stock";
-import CustomerView from "./pages/CustomerView";
+import { Redirect } from "react-router-dom";
 
 export const Context = createContext();
 function App() {
@@ -19,15 +18,13 @@ function App() {
     <Context.Provider value={{ GlobalItem, setGlobalItem }}>
       <Router>
         <Switch>
-          <Route path="/" exact component={Admin} />
+          <Route path="/" exact component={Dashboard} />
+          <Route path="/admin/stock" exact component={Stock} />
           <Route path="/merchant/checkout" exact component={Checkout} />
           <Route path="/merchant/print" exact component={Print} />
           <Route path="/merchant/end" exact component={End} />
-          <Route path="/merchant/customer" exact component={CustomerView} />
-          <Route path="/merchant/barcode" exact component={Barcode} />
           <Route path="/404" exact component={NotFound} />
-          <Route path="/admin/dashboard" exact component={Dashboard} />
-          <Route path="/admin/stock" exact component={Stock} />
+          <Redirect to="/" />
         </Switch>
       </Router>
     </Context.Provider>

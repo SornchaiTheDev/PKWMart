@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faPlus } from "@fortawesome/free-solid-svg-icons";
-import firebase from "../../firebase";
+import axios from "axios";
 import Popup from "../../components/Popup";
 import Items from "../../components/Stock_Item";
 import AddItem from "../../components/AddItem";
@@ -11,96 +11,29 @@ import "../../App.css";
 
 function Stock() {
   const history = useHistory();
-  const [user, setUser] = useState([]);
   const [addItem, setAddItem] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [last, setLast] = useState(null);
   const [stockItem, setStockItem] = useState(false);
   const [editItem, setEditItem] = useState(false);
-  const [count, setCount] = useState(0);
+  const [count, setCount] = useState("0");
+
+  const { search } = useLocation();
+  const counter = new URLSearchParams(search).get("counter");
 
   //All Items
   const [item, setItem] = useState([]);
 
-  //Auth Status
   useEffect(() => {
-    firebase.auth().onAuthStateChanged((user) => {
-      setUser(user);
-      if (!user) {
-        history.replace("/");
-      }
+    axios
+      .get(`http://${process.env.REACT_APP_HOSTNAME}/stock`)
+      .then((res) => setItem(res.data));
+
+    axios.get(`http://${process.env.REACT_APP_HOSTNAME}/count`).then((res) => {
+      const amount = res.data.amount;
+      setCount(amount);
     });
   }, []);
 
-  useEffect(() => {
-    firebase
-      .firestore()
-      .collection("stock")
-      .orderBy("createdAt", "asc")
-      .limit(5)
-      .get()
-      .then((docs) => {
-        const data = [];
-        let last;
-        docs.forEach((doc) => {
-          doc.id !== "count" && data.push({ ...doc.data(), id: doc.id });
-
-          last = doc.data().createdAt;
-        });
-        setItem(() => [...data]);
-        setLast(last);
-      });
-
-    firebase
-      .firestore()
-      .collection("stock")
-      .doc("count")
-      .get()
-      .then((doc) => setCount(doc.data().amount));
-  }, []);
-
-  const infiniteLoad = (e) => {
-    const { window } = e.currentTarget;
-
-    if (
-      Math.round(window.innerHeight + window.scrollY) ===
-        document.body.offsetHeight &&
-      last !== undefined
-    ) {
-      setIsLoading(true);
-      firebase
-        .firestore()
-        .collection("stock")
-        .orderBy("createdAt", "asc")
-        .startAfter(last)
-        .limit(5)
-        .get()
-        .then((docs) => {
-          const data = [];
-          let last;
-          docs.forEach((doc) => {
-            if (
-              doc.id === "count" &&
-              item.some(({ name }) => name === doc.data().name)
-            ) {
-              return;
-            }
-            data.push({ ...doc.data(), id: doc.id });
-            last = doc.data().createdAt;
-          });
-          setItem((prev) => [...prev, ...data]);
-          setLast(last);
-          setIsLoading(false);
-        })
-        .catch((err) => console.log(err.code));
-    }
-  };
-  useEffect(() => {
-    window.addEventListener("scroll", infiniteLoad);
-    return () => window.removeEventListener("scroll", infiniteLoad);
-  }, [last]);
-
-  if (user === []) return <div></div>;
   return (
     <>
       <Popup add={stockItem} close={() => setStockItem(false)} stock />
@@ -133,7 +66,7 @@ function Stock() {
               gap: 20,
               cursor: "pointer",
             }}
-            onClick={() => history.replace("/admin/dashboard")}
+            onClick={() => history.replace(`/?counter=${counter}`)}
           >
             <FontAwesomeIcon icon={faArrowLeft} size="1x" color="black" />
             <h4 style={{ color: "black" }}>กลับหน้าหลัก</h4>
@@ -187,7 +120,7 @@ function Stock() {
                 <FontAwesomeIcon icon={faPlus} />
                 <h4>เพิ่มสินค้า</h4>
               </div>
-              <div
+              {/* <div
                 style={{
                   padding: 20,
                   borderRadius: 20,
@@ -203,7 +136,7 @@ function Stock() {
               >
                 <FontAwesomeIcon icon={faPlus} />
                 <h4>เติมสินค้าในสต็อก</h4>
-              </div>
+              </div> */}
               <div
                 style={{
                   padding: 20,
@@ -243,25 +176,19 @@ function Stock() {
             {item.length === 0 && <h3>ไม่มีสินค้า</h3>}
             {item
               .sort((a, b) => b.stock_item - a.stock_item)
-              .map(({ name, price, stock_amount, id }, index) => (
+              .map(({ name, price, stock_amount, barcode }) => (
                 <Items
-                  key={index}
-                  item_barcode={id}
+                  key={barcode}
+                  item_barcode={barcode}
                   item_name={name.toString()}
                   item_price={price}
                   stock_amount={stock_amount}
-                  removeItem={(item_name) => (
+                  removeItem={(item_barcode) => {
+                    setCount((prev) => prev - 1);
                     setItem((prev) =>
-                      prev.filter(({ name }) => name !== item_name)
-                    ),
-                    firebase
-                      .firestore()
-                      .collection("stock")
-                      .doc("count")
-                      .update({
-                        amount: firebase.firestore.FieldValue.increment(-1),
-                      })
-                  )}
+                      prev.filter(({ barcode }) => barcode !== item_barcode)
+                    );
+                  }}
                 />
               ))}
             {isLoading && <h2>กำลังโหลด</h2>}

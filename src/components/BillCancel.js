@@ -1,28 +1,22 @@
 import React, { useState } from "react";
-import firebase from "../firebase";
+import axios from "axios";
 
-const BillCancel = ({ show, close, bill }) => {
+const BillCancel = ({ show, close, bill, cancel }) => {
   const [barcode, setBarcode] = useState("");
 
-  const GetBill = () => {
-    firebase
-      .firestore()
-      .collection("history")
-      .doc(barcode)
-      .get()
-      .then((doc) => {
-        if (doc.data().status === "normal") {
-          bill({
-            item: [...doc.data().items],
-            bill: barcode,
-            counter: doc.data().counter,
-          });
-          close();
-        } else {
-          alert("ไม่พบบิลนี้");
-        }
-      })
-      .catch((err) => alert("ไม่พบบิลนี้"));
+  const GetBill = async () => {
+    const getBill = await axios.get(`http://${process.env.REACT_APP_HOSTNAME}/bill/${barcode}`);
+    if (getBill.data) {
+      bill({
+        item: getBill.data.items,
+        bill: barcode,
+        counter: getBill.data.counter,
+      });
+      close();
+      setBarcode("");
+    } else {
+      alert("ไม่พบบิลนี้");
+    }
   };
   return (
     <>
@@ -71,6 +65,7 @@ const BillCancel = ({ show, close, bill }) => {
               }}
             >
               <input
+                autofocus
                 style={{
                   borderRadius: 10,
                   outline: "none",
